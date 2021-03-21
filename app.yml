@@ -1,7 +1,5 @@
+application: go-app-engine-demo
 runtime: go114
-
-automatic_scaling:
-  min_num_instances: 1
 
 env_variables:
   GCLOUD_DATASET_ID: ${DEVSHELL_PROJECT_ID}
