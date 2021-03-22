@@ -1,5 +1,8 @@
 application: go-app-engine-demo
+servie: datastore-demo
 runtime: go114
+
+main: ./cmd
 
 env_variables:
   DATASTORE_PROJECT_ID: ${DEVSHELL_PROJECT_ID}
