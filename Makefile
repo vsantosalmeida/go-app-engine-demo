@@ -9,4 +9,4 @@ build-local:
 	@ echo " ---      FINISH BUILD       --- "
 
 set-project:
-	@ sed -i "s/\/project\//\/${PROJECT}\//g" app.yaml
+	@ sed -i "s/project/${PROJECT}/g" app.yaml
