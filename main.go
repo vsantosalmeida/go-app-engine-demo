@@ -18,8 +18,6 @@ func getPort() string {
 }
 
 func main() {
-	os.Setenv("DATASTORE_EMULATOR_HOST", "localhost:8081")
-	os.Setenv("DATASTORE_PROJECT_ID", "app-engine-demo")
 	port := getPort()
 	router := mux.NewRouter()
 	router.Use(commonMiddleware)
