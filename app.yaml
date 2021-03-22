@@ -1,5 +1,4 @@
 application: go-app-engine-demo
-servie: datastore-demo
 runtime: go114
 
 main: ./cmd
