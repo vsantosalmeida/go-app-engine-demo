@@ -1,4 +1,3 @@
-application: go-app-engine-demo
 runtime: go114
 
 main: ./cmd
