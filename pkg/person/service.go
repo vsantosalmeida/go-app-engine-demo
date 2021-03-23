@@ -21,6 +21,11 @@ func (s *Service) Store(p *entity.Person) (string, error) {
 	return s.repo.Store(p)
 }
 
+//
+func (s *Service) StoreMulti(p []*entity.Person) ([]string, error) {
+	return s.repo.StoreMulti(p)
+}
+
 //Find a person
 func (s *Service) FindByKey(k string) (*entity.Person, error) {
 	return s.repo.FindByKey(k)

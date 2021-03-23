@@ -42,6 +42,36 @@ func personAdd(service person.UseCase) http.Handler {
 	})
 }
 
+func personMultiAdd(service person.UseCase) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		errorMessage := "Error adding Persons"
+		var p entity.PersonsInput
+		err := json.NewDecoder(r.Body).Decode(&p)
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(errorMessage))
+			return
+		}
+
+		var keys []string
+		keys, err = service.StoreMulti(p.Persons)
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(errorMessage))
+			return
+		}
+		w.WriteHeader(http.StatusCreated)
+		if err := json.NewEncoder(w).Encode(keys); err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(errorMessage))
+			return
+		}
+	})
+}
+
 func findAllPersons(service person.UseCase) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		errorMessage := "Error to find persons"
@@ -118,6 +148,10 @@ func MakePersonHandlers(r *mux.Router, n negroni.Negroni, service person.UseCase
 	r.Handle("/person", n.With(
 		negroni.Wrap(personAdd(service)),
 	)).Methods("POST", "OPTIONS").Name("personAdd")
+
+	r.Handle("/persons", n.With(
+		negroni.Wrap(personMultiAdd(service)),
+	)).Methods("POST", "OPTIONS").Name("personMultiAdd")
 
 	r.Handle("/person/{key}", n.With(
 		negroni.Wrap(deletePerson(service)),

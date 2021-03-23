@@ -11,6 +11,7 @@ type Reader interface {
 //Writer person writer
 type Writer interface {
 	Store(p *entity.Person) (string, error)
+	StoreMulti(p []*entity.Person) ([]string, error)
 	Delete(k string) error
 }
 

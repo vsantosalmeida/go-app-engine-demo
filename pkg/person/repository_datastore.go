@@ -7,6 +7,7 @@ import (
 	"go-app-engine-demo/config"
 	"go-app-engine-demo/pkg/entity"
 	"log"
+	"strings"
 )
 
 type DataStoreRepository struct {
@@ -49,13 +50,23 @@ func (r *DataStoreRepository) FindAll() ([]*entity.Person, error) {
 func (r *DataStoreRepository) Store(p *entity.Person) (string, error) {
 	k := datastore.NameKey(config.DatastoreKind, uuid.New().String(), nil)
 	client := r.client
-	ctx := r.ctx
-	if _, err := client.Put(ctx, k, p); err != nil {
+	if _, err := client.Put(r.ctx, k, p); err != nil {
 		return "", err
 	}
 	log.Printf("Entity saved: %s", k.String())
 
 	return k.String(), nil
+}
+
+func (r *DataStoreRepository) StoreMulti(p []*entity.Person) ([]string, error) {
+	keys := generateKeys(len(p))
+	client := r.client
+	if _, err := client.PutMulti(r.ctx, keys, p); err != nil {
+		return nil, err
+	}
+	log.Printf("Entities saved")
+
+	return convertKeysToString(keys), nil
 }
 
 func (r *DataStoreRepository) Delete(k string) error {
@@ -69,4 +80,25 @@ func (r *DataStoreRepository) Delete(k string) error {
 	}
 
 	return nil
+}
+
+func generateKeys(r int) []*datastore.Key {
+	var keys []*datastore.Key
+
+	for i := 0; i < r; i++ {
+		k := datastore.NameKey(config.DatastoreKind, uuid.New().String(), nil)
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+func convertKeysToString(keys []*datastore.Key) []string {
+	var stringKeys []string
+
+	for _, k := range keys {
+		formatKey := strings.Split(k.String(), ",")[1]
+		stringKeys = append(stringKeys, formatKey)
+	}
+
+	return stringKeys
 }
