@@ -6,7 +6,7 @@ import (
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"go-app-engine-demo/api/handler"
-	"go-app-engine-demo/pkg/config"
+	"go-app-engine-demo/config"
 	"go-app-engine-demo/pkg/midleware"
 	"go-app-engine-demo/pkg/person"
 	"log"

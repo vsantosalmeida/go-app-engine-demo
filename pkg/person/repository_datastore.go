@@ -4,7 +4,7 @@ import (
 	"cloud.google.com/go/datastore"
 	"context"
 	"github.com/google/uuid"
-	"go-app-engine-demo/pkg/config"
+	"go-app-engine-demo/config"
 	"go-app-engine-demo/pkg/entity"
 	"log"
 )
