@@ -45,7 +45,7 @@ func personAdd(service person.UseCase) http.Handler {
 func personMultiAdd(service person.UseCase) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		errorMessage := "Error adding Persons"
-		var p entity.PersonsInput
+		var p []*entity.Person
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
 			log.Println(err.Error())
@@ -55,7 +55,7 @@ func personMultiAdd(service person.UseCase) http.Handler {
 		}
 
 		var keys []string
-		keys, err = service.StoreMulti(p.Persons)
+		keys, err = service.StoreMulti(p)
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)

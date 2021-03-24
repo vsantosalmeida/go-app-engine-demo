@@ -5,10 +5,6 @@ import (
 	"strings"
 )
 
-type PersonsInput struct {
-	Persons []*Person `json:"persons"`
-}
-
 type Person struct {
 	Key       string  `json:"key,omitempty" datastore:"__key__"`
 	Firstname string  `json:"firstname,omitempty"`
