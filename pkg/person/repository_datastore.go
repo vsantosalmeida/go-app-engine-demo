@@ -29,7 +29,7 @@ func (r *DataStoreRepository) FindByKey(k string) (*entity.Person, error) {
 	log.Printf("Tying to find Person: %s", k)
 	err := client.Get(r.ctx, pkey, &p)
 	if err != nil {
-		return nil, err
+		return nil, NewErrPersonNotFound()
 	}
 
 	return &p, nil

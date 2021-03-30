@@ -13,13 +13,11 @@ import (
 
 func personAdd(service person.UseCase) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		errorMessage := "Error adding Person"
 		var p *entity.Person
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(errorMessage))
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
@@ -27,16 +25,14 @@ func personAdd(service person.UseCase) http.Handler {
 		key, err = service.Store(p)
 		if err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(errorMessage))
+			handleError(w, err)
 			return
 		}
 		formatKey := strings.Split(key, ",")[1]
 		w.WriteHeader(http.StatusCreated)
-		if err := json.NewEncoder(w).Encode(formatKey); err != nil {
+		if err = json.NewEncoder(w).Encode(formatKey); err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(errorMessage))
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	})
@@ -44,13 +40,11 @@ func personAdd(service person.UseCase) http.Handler {
 
 func personMultiAdd(service person.UseCase) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		errorMessage := "Error adding Persons"
 		var p []*entity.Person
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(errorMessage))
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
@@ -58,15 +52,13 @@ func personMultiAdd(service person.UseCase) http.Handler {
 		keys, err = service.StoreMulti(p)
 		if err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(errorMessage))
+			handleError(w, err)
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
-		if err := json.NewEncoder(w).Encode(keys); err != nil {
+		if err = json.NewEncoder(w).Encode(keys); err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(errorMessage))
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	})
@@ -79,60 +71,61 @@ func findAllPersons(service person.UseCase) http.Handler {
 		data, err := service.FindAll()
 		if err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(errorMessage))
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		if data == nil {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte(errorMessage))
+			http.Error(w, errorMessage, http.StatusNotFound)
 			return
 		}
-		if err := json.NewEncoder(w).Encode(data); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(errorMessage))
+		if err = json.NewEncoder(w).Encode(data); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
 }
 
 func findPersonByKey(service person.UseCase) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		errorMessage := "Error to find persons"
 		params := mux.Vars(r)
 		k := params["key"]
 		data, err := service.FindByKey(k)
 		if err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(errorMessage))
+			handleError(w, err)
 			return
 		}
 
-		if data == nil {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte(errorMessage))
-			return
-		}
-		if err := json.NewEncoder(w).Encode(data); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(errorMessage))
+		if err = json.NewEncoder(w).Encode(data); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
 }
 
 func deletePerson(service person.UseCase) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		errorMessage := "Error removing person"
 		params := mux.Vars(r)
 		k := params["key"]
 		err := service.Delete(k)
 		if err != nil {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte(errorMessage))
+			handleError(w, err)
 			return
 		}
+		w.WriteHeader(http.StatusNoContent)
 	})
+}
+
+func handleError(w http.ResponseWriter, err error) {
+	switch err.(type) {
+	case *person.ErrDeletePerson:
+		http.Error(w, err.Error(), http.StatusConflict)
+	case *person.ErrPersonNotFound:
+		http.Error(w, err.Error(), http.StatusNotFound)
+	case *person.ErrValidatePerson:
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	default:
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 //MakePersonHandlers make url handlers

@@ -17,3 +17,6 @@ set-project:
 
 dependencies:
 	@ go mod download
+
+start-datastore:
+	@ gcloud beta emulators datastore start --project gcp-app-engine --no-store-on-disk

@@ -34,7 +34,7 @@ func (r *MemRepo) StoreMulti(p []*entity.Person) ([]string, error) {
 
 func (r *MemRepo) Delete(k string) error {
 	if r.m[k] == nil {
-		return entity.ErrNotFound
+		return NewErrPersonNotFound()
 	}
 	r.m[k] = nil
 
@@ -53,7 +53,7 @@ func (r *MemRepo) FindAll() ([]*entity.Person, error) {
 
 func (r *MemRepo) FindByKey(k string) (*entity.Person, error) {
 	if r.m[k] == nil {
-		return nil, entity.ErrNotFound
+		return nil, NewErrPersonNotFound()
 	}
 
 	return r.m[k], nil
