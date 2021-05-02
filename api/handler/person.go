@@ -28,7 +28,16 @@ func personAdd(service person.UseCase) http.Handler {
 			handleError(w, err)
 			return
 		}
+
 		formatKey := strings.Split(key, ",")[1]
+
+		p.Key = formatKey
+		err = service.CreateEvent(p)
+		if err != nil {
+			log.Println(err.Error())
+			handleError(w, err)
+		}
+
 		w.WriteHeader(http.StatusCreated)
 		if err = json.NewEncoder(w).Encode(formatKey); err != nil {
 			log.Println(err.Error())

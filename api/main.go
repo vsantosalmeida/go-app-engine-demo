@@ -9,6 +9,7 @@ import (
 	"go-app-engine-demo/config"
 	"go-app-engine-demo/pkg/midleware"
 	"go-app-engine-demo/pkg/person"
+	"go-app-engine-demo/pkg/stream"
 	"log"
 	"net/http"
 	"os"
@@ -30,7 +31,8 @@ func main() {
 	router := mux.NewRouter()
 
 	personRepo := person.NewDataStoreRepository(client, ctx)
-	personSvc := person.NewService(personRepo)
+	producer, _ := stream.NewKafkaProducer()
+	personSvc := person.NewService(personRepo, producer)
 
 	//handlers
 	n := negroni.New(

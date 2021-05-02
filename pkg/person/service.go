@@ -1,19 +1,26 @@
 package person
 
 import (
+	"encoding/binary"
 	"github.com/bearbin/go-age"
+	"github.com/golang/protobuf/proto"
+	"go-app-engine-demo/config"
 	"go-app-engine-demo/pkg/entity"
+	"go-app-engine-demo/pkg/stream"
+	"go-app-engine-demo/protobuf"
 )
 
 //Service service interface
 type Service struct {
-	repo Repository
+	repo     Repository
+	producer stream.Producer
 }
 
 //NewService create new service
-func NewService(r Repository) *Service {
+func NewService(r Repository, p stream.Producer) *Service {
 	return &Service{
-		repo: r,
+		repo:     r,
+		producer: p,
 	}
 }
 
@@ -69,6 +76,40 @@ func (s *Service) Delete(k string) error {
 	}
 
 	return s.repo.Delete(k)
+}
+
+func (s *Service) CreateEvent(p *entity.Person) error {
+	message := mapPersonToMessage(p)
+	messageBytes, err := proto.Marshal(message)
+	if err != nil {
+		return err
+	}
+	schemaIDBytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(schemaIDBytes, uint32(config.SchemaId))
+
+	var recordValue []byte
+	recordValue = append(recordValue, byte(0))
+	recordValue = append(recordValue, schemaIDBytes...)
+	recordValue = append(recordValue, byte(0))
+	recordValue = append(recordValue, messageBytes...)
+
+	return s.producer.Write(recordValue, config.PearsonCreatedTopic)
+}
+
+func mapPersonToMessage(p *entity.Person) *protobuf.Person {
+	address := &protobuf.Address{
+		City:  p.Address.City,
+		State: p.Address.State,
+	}
+
+	return &protobuf.Person{
+		Key:       p.Key,
+		FirstName: p.FirstName,
+		LastName:  p.LastName,
+		BirthDate: p.BirthDate.Unix(),
+		ParentKey: p.ParentKey,
+		Address:   address,
+	}
 }
 
 func (s *Service) personStoreValidation(p *entity.Person) error {

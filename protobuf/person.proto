@@ -1,0 +1,19 @@
+syntax="proto3";
+
+package person;
+
+option go_package = ".;protobuf";
+
+message Person {
+    string key = 1;
+    string firstName = 2;
+    string lastName = 3;
+    int64 birthDate = 4;
+    string parentKey = 5;
+    Address address = 6;
+}
+
+message Address {
+   string city = 1;
+   string state = 2;
+}

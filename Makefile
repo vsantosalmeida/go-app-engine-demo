@@ -20,3 +20,15 @@ dependencies:
 
 start-datastore:
 	@ gcloud beta emulators datastore start --project gcp-app-engine --no-store-on-disk
+
+start-kafka:
+	@ docker-compose up -d
+
+stop-kafka:
+	@ docker-compose down
+
+create-topics:
+	@ bash +x ./create-topics.sh
+
+compile-protobuf:
+	@ protoc --proto_path=protobuf --go_out=protobuf person.proto
