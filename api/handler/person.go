@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
+	"go-app-engine-demo/api/dto"
 	"go-app-engine-demo/pkg/entity"
 	"go-app-engine-demo/pkg/person"
 	"log"
 	"net/http"
-	"strings"
 )
 
 func personAdd(service person.UseCase) http.Handler {
@@ -21,25 +21,15 @@ func personAdd(service person.UseCase) http.Handler {
 			return
 		}
 
-		var key string
-		key, err = service.Store(p)
+		err = service.Store(p)
 		if err != nil {
 			log.Println(err.Error())
 			handleError(w, err)
 			return
 		}
 
-		formatKey := strings.Split(key, ",")[1]
-
-		p.Key = formatKey
-		err = service.CreateEvent(p)
-		if err != nil {
-			log.Println(err.Error())
-			handleError(w, err)
-		}
-
 		w.WriteHeader(http.StatusCreated)
-		if err = json.NewEncoder(w).Encode(formatKey); err != nil {
+		if err = json.NewEncoder(w).Encode(p); err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -57,18 +47,29 @@ func personMultiAdd(service person.UseCase) http.Handler {
 			return
 		}
 
-		var keys []string
-		keys, err = service.StoreMulti(p)
-		if err != nil {
-			log.Println(err.Error())
-			handleError(w, err)
-			return
-		}
-		w.WriteHeader(http.StatusCreated)
-		if err = json.NewEncoder(w).Encode(keys); err != nil {
-			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		var b dto.PersonBatch
+		s := make(chan *entity.Person)
+		f := make(chan *entity.Person)
+		q := make(chan bool)
+		go func() {
+			service.StoreMulti(p, s, f, q)
+		}()
+
+		for {
+			select {
+			case v := <-s:
+				b.S = append(b.S, v)
+			case v := <-f:
+				b.F = append(b.F, v)
+			case _ = <-q:
+				w.WriteHeader(http.StatusCreated)
+				if err = json.NewEncoder(w).Encode(b); err != nil {
+					log.Println(err.Error())
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+				return
+			}
 		}
 	})
 }

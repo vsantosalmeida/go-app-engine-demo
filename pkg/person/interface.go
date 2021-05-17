@@ -12,14 +12,17 @@ type Reader interface {
 
 //Writer person writer
 type Writer interface {
-	Store(p *entity.Person) (string, error)
-	StoreMulti(p []*entity.Person) ([]string, error)
+	Store(p *entity.Person) error
 	Delete(k string) error
 }
 
 //Event creation interface
 type Event interface {
 	CreateEvent(p *entity.Person) error
+}
+
+type Batch interface {
+	StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person, q chan<- bool)
 }
 
 //Repository repository interface
@@ -33,4 +36,5 @@ type UseCase interface {
 	Reader
 	Writer
 	Event
+	Batch
 }

@@ -17,39 +17,38 @@ type Service struct {
 }
 
 //NewService create new service
-func NewService(r Repository, p stream.Producer) *Service {
+func NewService(r Repository) *Service {
 	return &Service{
-		repo:     r,
-		producer: p,
+		repo: r,
 	}
 }
 
 //Store a person
-func (s *Service) Store(p *entity.Person) (string, error) {
+func (s *Service) Store(p *entity.Person) error {
 	a := age.Age(p.BirthDate)
 	if a < 18 {
 		err := s.personStoreValidation(p)
 		if err != nil {
-			return "", err
+			return err
 		}
 	}
 
 	return s.repo.Store(p)
 }
 
-//Batch for store multi Persons
-func (s *Service) StoreMulti(p []*entity.Person) ([]string, error) {
+// StoreMulti Batch for store multi Persons
+func (s *Service) StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person, q chan<- bool) {
 	for _, person := range p {
-		err := s.personStoreValidation(person)
+		err := s.Store(person)
 		if err != nil {
-			return nil, err
+			fail <- person
 		}
+		success <- person
 	}
-
-	return s.repo.StoreMulti(p)
+	close(q)
 }
 
-//Find a person
+// FindByKey Find a person
 func (s *Service) FindByKey(k string) (*entity.Person, error) {
 	return s.repo.FindByKey(k)
 }

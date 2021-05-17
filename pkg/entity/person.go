@@ -20,7 +20,7 @@ type Address struct {
 	State string `json:"state,omitempty"`
 }
 
-//Implement LoadKey and PropertyLoadSaver interface
+// LoadKey Implement LoadKey and PropertyLoadSaver interface
 func (p *Person) LoadKey(k *datastore.Key) error {
 	formatKey := strings.Split(k.String(), ",")[1]
 	p.Key = formatKey
