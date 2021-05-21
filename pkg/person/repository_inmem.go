@@ -16,20 +16,9 @@ func NewMemRepo() *MemRepo {
 }
 
 //Writer implementation
-func (r *MemRepo) Store(p *entity.Person) (string, error) {
+func (r *MemRepo) Store(p *entity.Person) error {
 	r.m[p.Key] = p
-
-	return p.Key, nil
-}
-
-func (r *MemRepo) StoreMulti(p []*entity.Person) ([]string, error) {
-	var keys []string
-	for _, person := range p {
-		r.Store(person)
-		keys = append(keys, person.Key)
-	}
-
-	return keys, nil
+	return nil
 }
 
 func (r *MemRepo) Delete(k string) error {

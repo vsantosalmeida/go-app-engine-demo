@@ -14,9 +14,8 @@ func TestService_Store(t *testing.T) {
 	p := generatePerson()
 
 	t.Run("store", func(t *testing.T) {
-		key, err := svc.Store(p)
+		err := svc.Store(p)
 		assert.Nil(t, err)
-		assert.Equal(t, key, p.Key)
 	})
 
 	t.Run("storeWithParentKey", func(t *testing.T) {
@@ -27,9 +26,8 @@ func TestService_Store(t *testing.T) {
 			ParentKey: p.Key,
 			BirthDate: time.Now(),
 		}
-		key, err := svc.Store(p2)
+		err := svc.Store(p2)
 		assert.Nil(t, err)
-		assert.Equal(t, key, p2.Key)
 	})
 
 	t.Run("failToStore", func(t *testing.T) {
@@ -39,7 +37,19 @@ func TestService_Store(t *testing.T) {
 			LastName:  "Cabra",
 			BirthDate: time.Now(),
 		}
-		_, err := svc.Store(p2)
+		err := svc.Store(p2)
+		assert.Equal(t, NewErrValidatePerson(), err)
+	})
+
+	t.Run("failToStoreUnknownParentKey", func(t *testing.T) {
+		p2 := &entity.Person{
+			Key:       uuid.New().String(),
+			FirstName: "Marcio",
+			LastName:  "Cabra",
+			BirthDate: time.Now(),
+			ParentKey: uuid.New().String(),
+		}
+		err := svc.Store(p2)
 		assert.Equal(t, NewErrValidatePerson(), err)
 	})
 }
@@ -48,10 +58,11 @@ func TestService_FindByKeyAndFindAll(t *testing.T) {
 	repo := NewMemRepo()
 	svc := NewService(repo)
 	p := generatePersonCollection()
+	svc.Store(p[0])
+	svc.Store(p[1])
 
-	keys, _ := svc.StoreMulti(p)
 	t.Run("findByKey", func(t *testing.T) {
-		k, err := svc.FindByKey(keys[0])
+		k, err := svc.FindByKey(p[0].Key)
 		assert.Nil(t, err)
 		assert.Equal(t, p[0].Key, k.Key)
 		assert.Equal(t, p[0].FirstName, k.FirstName)
@@ -71,30 +82,25 @@ func TestService_FindByKeyAndFindAll(t *testing.T) {
 func TestService_Delete(t *testing.T) {
 	repo := NewMemRepo()
 	svc := NewService(repo)
-	p := generatePerson()
-	k, _ := svc.Store(p)
-	p2 := &entity.Person{
-		Key:       uuid.New().String(),
-		FirstName: "Marcio",
-		LastName:  "Cabra",
-		ParentKey: p.Key,
-		BirthDate: time.Now(),
-	}
-	k2, _ := svc.Store(p2)
+	p := generatePersonCollection()
+	svc.Store(p[0])
+	p[1].ParentKey = p[0].Key
+	p[1].BirthDate = time.Now()
+	svc.Store(p[1])
 
 	t.Run("deleteFail", func(t *testing.T) {
-		err := svc.Delete(k2)
+		err := svc.Delete(p[1].Key)
 		assert.Equal(t, NewErrDeletePerson(), err)
 	})
 
 	t.Run("delete", func(t *testing.T) {
-		err := svc.Delete(k)
+		err := svc.Delete(p[0].Key)
 		assert.Nil(t, err)
-		err = svc.Delete(k2)
+		err = svc.Delete(p[1].Key)
 		assert.Nil(t, err)
-		_, err = svc.FindByKey(k)
+		_, err = svc.FindByKey(p[0].Key)
 		assert.Equal(t, NewErrPersonNotFound(), err)
-		_, err = svc.FindByKey(k2)
+		_, err = svc.FindByKey(p[1].Key)
 		assert.Equal(t, NewErrPersonNotFound(), err)
 	})
 }
