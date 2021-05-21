@@ -27,7 +27,7 @@ func TestPersonAdd(t *testing.T) {
 			"city": "São Paulo",
 			"state": "SP"
 		}
-}`)
+	}`)
 	apitest.New().
 		Handler(personAdd(svc)).
 		Post(path).

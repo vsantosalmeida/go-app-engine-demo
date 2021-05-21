@@ -22,7 +22,7 @@ type Event interface {
 }
 
 type Batch interface {
-	StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person, q chan<- bool)
+	StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person)
 }
 
 //Repository repository interface

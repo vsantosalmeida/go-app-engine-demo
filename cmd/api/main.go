@@ -17,9 +17,6 @@ import (
 )
 
 func main() {
-	os.Setenv("DATASTORE_PROJECT_ID", "gcp-app-engine")
-	os.Setenv("DATASTORE_EMULATOR_HOST", "localhost:8081")
-
 	ctx := context.Background()
 	client, err := datastore.NewClient(ctx, config.ProjectId)
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 	"go-app-engine-demo/pkg/person"
 	"log"
 	"net/http"
+	"sync"
 )
 
 func personAdd(service person.UseCase) http.Handler {
@@ -48,28 +49,35 @@ func personMultiAdd(service person.UseCase) http.Handler {
 		}
 
 		var b dto.PersonBatch
+		var wg sync.WaitGroup
 		s := make(chan *entity.Person)
 		f := make(chan *entity.Person)
-		q := make(chan bool)
-		go func() {
-			service.StoreMulti(p, s, f, q)
-		}()
+		d := make(chan bool, 1)
+		wg.Add(len(p))
 
-		for {
-			select {
-			case v := <-s:
-				b.S = append(b.S, v)
-			case v := <-f:
-				b.F = append(b.F, v)
-			case _ = <-q:
-				w.WriteHeader(http.StatusCreated)
-				if err = json.NewEncoder(w).Encode(b); err != nil {
-					log.Println(err.Error())
-					http.Error(w, err.Error(), http.StatusInternalServerError)
+		go service.StoreMulti(p, s, f)
+
+		go func() {
+			for {
+				select {
+				case v := <-s:
+					b.S = append(b.S, v)
+					wg.Done()
+				case v := <-f:
+					b.F = append(b.F, v)
+					wg.Done()
+				case _ = <-d:
 					return
 				}
-				return
 			}
+		}()
+		wg.Wait()
+		d <- true
+
+		w.WriteHeader(http.StatusCreated)
+		if err = json.NewEncoder(w).Encode(b); err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
 }

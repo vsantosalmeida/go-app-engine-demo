@@ -8,6 +8,7 @@ import (
 	"go-app-engine-demo/pkg/entity"
 	"go-app-engine-demo/pkg/stream"
 	"go-app-engine-demo/protobuf"
+	"log"
 )
 
 //Service service interface
@@ -27,8 +28,10 @@ func NewService(r Repository) *Service {
 func (s *Service) Store(p *entity.Person) error {
 	a := age.Age(p.BirthDate)
 	if a < 18 {
+		log.Printf("Validating person with age less than 18 Name: %s, BirthDate: %s", p.FirstName, p.BirthDate)
 		err := s.personStoreValidation(p)
 		if err != nil {
+			log.Print("Person validation failed")
 			return err
 		}
 	}
@@ -37,15 +40,15 @@ func (s *Service) Store(p *entity.Person) error {
 }
 
 // StoreMulti Batch for store multi Persons
-func (s *Service) StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person, q chan<- bool) {
+func (s *Service) StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person) {
 	for _, person := range p {
 		err := s.Store(person)
 		if err != nil {
 			fail <- person
+			continue
 		}
 		success <- person
 	}
-	close(q)
 }
 
 // FindByKey Find a person

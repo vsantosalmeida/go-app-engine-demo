@@ -50,7 +50,7 @@ func (r *DataStoreRepository) FindAll() ([]*entity.Person, error) {
 		log.Printf("Failed to find Persons: %q", err)
 		return nil, err
 	}
-
+	log.Printf("Finded %d Persons", len(persons))
 	return persons, nil
 }
 
