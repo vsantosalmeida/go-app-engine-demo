@@ -89,19 +89,15 @@ func TestService_Delete(t *testing.T) {
 	svc.Store(p[1])
 
 	t.Run("deleteFail", func(t *testing.T) {
-		err := svc.Delete(p[1].Key)
+		err := svc.Delete(p[0].Key)
 		assert.Equal(t, NewErrDeletePerson(), err)
 	})
 
 	t.Run("delete", func(t *testing.T) {
-		err := svc.Delete(p[0].Key)
+		err := svc.Delete(p[1].Key)
 		assert.Nil(t, err)
-		err = svc.Delete(p[1].Key)
+		err = svc.Delete(p[0].Key)
 		assert.Nil(t, err)
-		_, err = svc.FindByKey(p[0].Key)
-		assert.Equal(t, NewErrPersonNotFound(), err)
-		_, err = svc.FindByKey(p[1].Key)
-		assert.Equal(t, NewErrPersonNotFound(), err)
 	})
 }
 

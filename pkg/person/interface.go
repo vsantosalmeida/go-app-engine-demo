@@ -8,6 +8,7 @@ import (
 type Reader interface {
 	FindAll() ([]*entity.Person, error)
 	FindByKey(k string) (*entity.Person, error)
+	IsKeyAssociated(pk string) (bool, error)
 }
 
 //Writer person writer
@@ -22,6 +23,7 @@ type Event interface {
 }
 
 type Batch interface {
+	// StoreMulti TODO método deve retornar algum erro em caso de falha
 	StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person)
 }
 

@@ -13,6 +13,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/steinfletcher/apitest v1.5.3
 	github.com/stretchr/testify v1.7.0
+	google.golang.org/api v0.40.0
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/confluentinc/confluent-kafka-go.v1 v1.6.1
 )

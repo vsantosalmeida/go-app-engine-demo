@@ -51,8 +51,11 @@ func personMultiAdd(service person.UseCase) http.Handler {
 		var b dto.PersonBatch
 		var wg sync.WaitGroup
 		s := make(chan *entity.Person)
+		defer close(s)
 		f := make(chan *entity.Person)
+		defer close(f)
 		d := make(chan bool, 1)
+		defer close(d)
 		wg.Add(len(p))
 
 		go service.StoreMulti(p, s, f)
@@ -66,7 +69,7 @@ func personMultiAdd(service person.UseCase) http.Handler {
 				case v := <-f:
 					b.F = append(b.F, v)
 					wg.Done()
-				case _ = <-d:
+				case <-d:
 					return
 				}
 			}

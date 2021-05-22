@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"go-app-engine-demo/config"
 	"go-app-engine-demo/pkg/entity"
+	"google.golang.org/api/iterator"
 	"log"
 	"strings"
 	"time"
@@ -39,6 +40,28 @@ func (r *DataStoreRepository) FindByKey(k string) (*entity.Person, error) {
 	return &p, nil
 }
 
+func (r *DataStoreRepository) IsKeyAssociated(pk string) (bool, error) {
+	query := datastore.NewQuery(config.DatastoreKind).Filter("ParentKey = ", pk)
+	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
+	defer cancel()
+
+	it := r.client.Run(ctx, query)
+	for {
+		var person entity.Person
+		_, err := it.Next(&person)
+		if err == iterator.Done {
+			log.Printf("No active parent key found: %q", err)
+			return false, nil
+		}
+		if err != nil {
+			log.Printf("Error fetching next person: %q", err)
+			return false, err
+		}
+		log.Printf("Active parent key found %s", person.Key)
+		return true, nil
+	}
+}
+
 func (r *DataStoreRepository) FindAll() ([]*entity.Person, error) {
 	var persons []*entity.Person
 	q := datastore.NewQuery(config.DatastoreKind)
@@ -50,7 +73,7 @@ func (r *DataStoreRepository) FindAll() ([]*entity.Person, error) {
 		log.Printf("Failed to find Persons: %q", err)
 		return nil, err
 	}
-	log.Printf("Finded %d Persons", len(persons))
+	log.Printf("Found %d Persons", len(persons))
 	return persons, nil
 }
 

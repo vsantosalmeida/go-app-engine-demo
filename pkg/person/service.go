@@ -39,7 +39,7 @@ func (s *Service) Store(p *entity.Person) error {
 	return s.repo.Store(p)
 }
 
-// StoreMulti Batch for store multi Persons
+// StoreMulti Batch TODO método deve retornar algum erro em caso de falha
 func (s *Service) StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person) {
 	for _, person := range p {
 		err := s.Store(person)
@@ -61,6 +61,10 @@ func (s *Service) FindAll() ([]*entity.Person, error) {
 	return s.repo.FindAll()
 }
 
+func (s *Service) IsKeyAssociated(pk string) (bool, error) {
+	return s.repo.IsKeyAssociated(pk)
+}
+
 //Delete a person
 func (s *Service) Delete(k string) error {
 	p, err := s.FindByKey(k)
@@ -69,10 +73,10 @@ func (s *Service) Delete(k string) error {
 	}
 
 	a := age.Age(p.BirthDate)
-	if a < 18 {
-		_, err = s.FindByKey(p.ParentKey)
-		// if error equals nil means this Person have an active parent
-		if err == nil {
+	if a > 18 {
+		// ok means the Person has a < 18 active Person
+		ok, err := s.IsKeyAssociated(p.Key)
+		if ok || err != nil {
 			return NewErrDeletePerson()
 		}
 	}
@@ -86,6 +90,9 @@ func (s *Service) CreateEvent(p *entity.Person) error {
 	if err != nil {
 		return err
 	}
+
+	//TODO encapular método único para fazer bind do schemID com a mensagem
+	// TODO implementar método para utilizar a API do schema registry
 	schemaIDBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(schemaIDBytes, uint32(config.SchemaId))
 

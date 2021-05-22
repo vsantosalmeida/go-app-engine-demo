@@ -15,7 +15,7 @@ func NewMemRepo() *MemRepo {
 	}
 }
 
-//Writer implementation
+// Store Writer implementation
 func (r *MemRepo) Store(p *entity.Person) error {
 	r.m[p.Key] = p
 	return nil
@@ -25,12 +25,12 @@ func (r *MemRepo) Delete(k string) error {
 	if r.m[k] == nil {
 		return NewErrPersonNotFound()
 	}
-	r.m[k] = nil
+	delete(r.m, k)
 
 	return nil
 }
 
-//Reader implementation
+// FindAll Reader implementation
 func (r *MemRepo) FindAll() ([]*entity.Person, error) {
 	var p []*entity.Person
 	for _, person := range r.m {
@@ -46,4 +46,14 @@ func (r *MemRepo) FindByKey(k string) (*entity.Person, error) {
 	}
 
 	return r.m[k], nil
+}
+
+func (r *MemRepo) IsKeyAssociated(pk string) (bool, error) {
+	for _, v := range r.m {
+		if v.ParentKey == pk {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
