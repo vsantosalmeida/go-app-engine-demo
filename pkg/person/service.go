@@ -5,6 +5,7 @@ import (
 	"github.com/bearbin/go-age"
 	"github.com/golang/protobuf/proto"
 	"go-app-engine-demo/config"
+	"go-app-engine-demo/pkg/crypto"
 	"go-app-engine-demo/pkg/entity"
 	"go-app-engine-demo/pkg/stream"
 	"go-app-engine-demo/protobuf"
@@ -28,8 +29,13 @@ func NewService(r Repository) *Service {
 func (s *Service) Store(p *entity.Person) error {
 	a := age.Age(p.BirthDate)
 	if a < 18 {
-		log.Printf("Validating person with age less than 18 Name: %s, BirthDate: %s", p.FirstName, p.BirthDate)
-		err := s.personStoreValidation(p)
+		c := crypto.NewCrypto(config.HashKey, []byte(p.FirstName))
+		err := c.Encrypt()
+		if err != nil {
+			return err
+		}
+		log.Printf("Validating person with age less than 18 Name: %v, BirthDate: %s", c.GetRaw(), p.BirthDate)
+		err = s.personStoreValidation(p)
 		if err != nil {
 			log.Print("Person validation failed")
 			return err
