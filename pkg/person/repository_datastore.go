@@ -14,17 +14,17 @@ import (
 
 const timeoutDuration = 3 * time.Second
 
-type DataStoreRepository struct {
+type dataStoreRepository struct {
 	client *datastore.Client
 }
 
-func NewDataStoreRepository(c *datastore.Client) *DataStoreRepository {
-	return &DataStoreRepository{
+func NewDataStoreRepository(c *datastore.Client) repository {
+	return &dataStoreRepository{
 		client: c,
 	}
 }
 
-func (r *DataStoreRepository) FindByKey(k string) (*entity.Person, error) {
+func (r *dataStoreRepository) FindByKey(k string) (*entity.Person, error) {
 	var p entity.Person
 	pkey := datastore.NameKey(config.DatastoreKind, k, nil)
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
@@ -40,7 +40,7 @@ func (r *DataStoreRepository) FindByKey(k string) (*entity.Person, error) {
 	return &p, nil
 }
 
-func (r *DataStoreRepository) IsKeyAssociated(pk string) (bool, error) {
+func (r *dataStoreRepository) IsKeyAssociated(pk string) (bool, error) {
 	query := datastore.NewQuery(config.DatastoreKind).Filter("ParentKey = ", pk)
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
 	defer cancel()
@@ -62,7 +62,7 @@ func (r *DataStoreRepository) IsKeyAssociated(pk string) (bool, error) {
 	}
 }
 
-func (r *DataStoreRepository) FindAll() ([]*entity.Person, error) {
+func (r *dataStoreRepository) FindAll() ([]*entity.Person, error) {
 	var persons []*entity.Person
 	q := datastore.NewQuery(config.DatastoreKind)
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
@@ -77,7 +77,7 @@ func (r *DataStoreRepository) FindAll() ([]*entity.Person, error) {
 	return persons, nil
 }
 
-func (r *DataStoreRepository) Store(p *entity.Person) error {
+func (r *dataStoreRepository) Store(p *entity.Person) error {
 	k := datastore.NameKey(config.DatastoreKind, uuid.New().String(), nil)
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
 	defer cancel()
@@ -92,7 +92,7 @@ func (r *DataStoreRepository) Store(p *entity.Person) error {
 	return nil
 }
 
-func (r *DataStoreRepository) Delete(k string) error {
+func (r *dataStoreRepository) Delete(k string) error {
 	client := r.client
 	pkey := datastore.NameKey(config.DatastoreKind, k, nil)
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)

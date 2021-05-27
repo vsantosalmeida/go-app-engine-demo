@@ -11,14 +11,14 @@ import (
 
 func decrypt() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var crypt crypto.Crypto
+		var crypt *crypto.Crypto
 		err := json.NewDecoder(r.Body).Decode(&crypt)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		svc := crypto.NewService(&crypt)
+		svc := crypto.NewService(crypt)
 		err = svc.Decrypt()
 		if err != nil {
 			log.Println(err.Error())

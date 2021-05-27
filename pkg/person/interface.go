@@ -4,39 +4,39 @@ import (
 	"go-app-engine-demo/pkg/entity"
 )
 
-//Reader Interface
-type Reader interface {
+//reader Interface
+type reader interface {
 	FindAll() ([]*entity.Person, error)
 	FindByKey(k string) (*entity.Person, error)
 	IsKeyAssociated(pk string) (bool, error)
 }
 
-//Writer person writer
-type Writer interface {
+//writer person writer
+type writer interface {
 	Store(p *entity.Person) error
 	Delete(k string) error
 }
 
-//Event creation interface
-type Event interface {
+//event creation interface
+type event interface {
 	CreateEvent(p *entity.Person) error
 }
 
-type Batch interface {
+type batch interface {
 	// StoreMulti TODO método deve retornar algum erro em caso de falha
 	StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person)
 }
 
-//Repository repository interface
-type Repository interface {
-	Reader
-	Writer
+//repository repository interface
+type repository interface {
+	reader
+	writer
 }
 
 //UseCase use case interface
 type UseCase interface {
-	Reader
-	Writer
-	Event
-	Batch
+	reader
+	writer
+	event
+	batch
 }

@@ -15,7 +15,7 @@ func NewMemRepo() *MemRepo {
 	}
 }
 
-// Store Writer implementation
+// Store writer implementation
 func (r *MemRepo) Store(p *entity.Person) error {
 	r.m[p.Key] = p
 	return nil
@@ -30,7 +30,7 @@ func (r *MemRepo) Delete(k string) error {
 	return nil
 }
 
-// FindAll Reader implementation
+// FindAll reader implementation
 func (r *MemRepo) FindAll() ([]*entity.Person, error) {
 	var p []*entity.Person
 	for _, person := range r.m {

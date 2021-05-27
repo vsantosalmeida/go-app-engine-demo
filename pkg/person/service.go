@@ -12,21 +12,21 @@ import (
 	"log"
 )
 
-//Service service interface
-type Service struct {
-	repo     Repository
+//service service interface
+type service struct {
+	repo     repository
 	producer stream.Producer
 }
 
 //NewService create new service
-func NewService(r Repository) *Service {
-	return &Service{
+func NewService(r repository) *service {
+	return &service{
 		repo: r,
 	}
 }
 
 //Store a person
-func (s *Service) Store(p *entity.Person) error {
+func (s *service) Store(p *entity.Person) error {
 	a := age.Age(p.BirthDate)
 	if a < 18 {
 		c := crypto.NewCrypto(config.HashKey, []byte(p.FirstName))
@@ -45,8 +45,8 @@ func (s *Service) Store(p *entity.Person) error {
 	return s.repo.Store(p)
 }
 
-// StoreMulti Batch TODO método deve retornar algum erro em caso de falha
-func (s *Service) StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person) {
+// StoreMulti batch TODO método deve retornar algum erro em caso de falha
+func (s *service) StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person) {
 	for _, person := range p {
 		err := s.Store(person)
 		if err != nil {
@@ -58,21 +58,21 @@ func (s *Service) StoreMulti(p []*entity.Person, success, fail chan<- *entity.Pe
 }
 
 // FindByKey Find a person
-func (s *Service) FindByKey(k string) (*entity.Person, error) {
+func (s *service) FindByKey(k string) (*entity.Person, error) {
 	return s.repo.FindByKey(k)
 }
 
 //FindAll persons
-func (s *Service) FindAll() ([]*entity.Person, error) {
+func (s *service) FindAll() ([]*entity.Person, error) {
 	return s.repo.FindAll()
 }
 
-func (s *Service) IsKeyAssociated(pk string) (bool, error) {
+func (s *service) IsKeyAssociated(pk string) (bool, error) {
 	return s.repo.IsKeyAssociated(pk)
 }
 
 //Delete a person
-func (s *Service) Delete(k string) error {
+func (s *service) Delete(k string) error {
 	p, err := s.FindByKey(k)
 	if err != nil {
 		return err
@@ -90,7 +90,7 @@ func (s *Service) Delete(k string) error {
 	return s.repo.Delete(k)
 }
 
-func (s *Service) CreateEvent(p *entity.Person) error {
+func (s *service) CreateEvent(p *entity.Person) error {
 	message := mapPersonToMessage(p)
 	messageBytes, err := proto.Marshal(message)
 	if err != nil {
@@ -127,7 +127,7 @@ func mapPersonToMessage(p *entity.Person) *protobuf.Person {
 	}
 }
 
-func (s *Service) personStoreValidation(p *entity.Person) error {
+func (s *service) personStoreValidation(p *entity.Person) error {
 	a := age.Age(p.BirthDate)
 	if a < 18 {
 		_, err := s.FindByKey(p.ParentKey)

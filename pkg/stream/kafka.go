@@ -6,12 +6,12 @@ import (
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
-// KafkaProducer contains the kafka producer client
-type KafkaProducer struct {
+// kafkaProducer contains the kafka producer client
+type kafkaProducer struct {
 	client *kafka.Producer
 }
 
-func NewKafkaProducer() (*KafkaProducer, error) {
+func NewKafkaProducer() (Producer, error) {
 	cfg := &kafka.ConfigMap{
 		config.BootstrapServers: config.KafkaHost,
 	}
@@ -21,32 +21,11 @@ func NewKafkaProducer() (*KafkaProducer, error) {
 		return nil, err
 	}
 
-	return &KafkaProducer{client: p}, nil
+	return &kafkaProducer{client: p}, nil
 }
 
-func (k *KafkaProducer) Write(msg []byte, topic string) error {
-	doneChan := make(chan bool)
-
-	go func() {
-		defer close(doneChan)
-		for e := range k.client.Events() {
-			switch ev := e.(type) {
-			case *kafka.Message:
-				m := ev
-				if m.TopicPartition.Error != nil {
-					fmt.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
-				} else {
-					fmt.Printf("Delivered message to topic %s [%d] at offset %v\n",
-						*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
-				}
-				return
-
-			default:
-				fmt.Printf("Ignored event: %s\n", ev)
-			}
-		}
-	}()
-
+func (k *kafkaProducer) Write(msg []byte, topic string) error {
+	deliveryChan := make(chan kafka.Event, 10000)
 	km := &kafka.Message{
 		Value: msg,
 		TopicPartition: kafka.TopicPartition{
@@ -55,14 +34,24 @@ func (k *KafkaProducer) Write(msg []byte, topic string) error {
 		},
 	}
 
-	k.client.ProduceChannel() <- km
+	_ = k.client.Produce(km, deliveryChan)
 
-	_ = <-doneChan
+	e := <-deliveryChan
+	m := e.(*kafka.Message)
+
+	if m.TopicPartition.Error != nil {
+		fmt.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
+	} else {
+		fmt.Printf("Delivered message to topic %s [%d] at offset %v\n",
+			*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
+	}
+
+	close(deliveryChan)
 
 	return nil
 }
 
-func (k *KafkaProducer) Close() {
+func (k *kafkaProducer) Close() {
 	// Wait all messages to be sent or until timeout (ms)
 	k.client.Flush(1000)
 
