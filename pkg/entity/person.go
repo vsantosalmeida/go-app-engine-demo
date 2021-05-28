@@ -2,8 +2,6 @@ package entity
 
 import (
 	"cloud.google.com/go/datastore"
-	"encoding/json"
-	"log"
 	"strings"
 	"time"
 )
@@ -35,9 +33,4 @@ func (p *Person) Load(ps []datastore.Property) error {
 
 func (p *Person) Save() ([]datastore.Property, error) {
 	return datastore.SaveStruct(p)
-}
-
-func (p *Person) ToByteArray() ([]byte, error) {
-	log.Print("Converting person to byte array")
-	return json.Marshal(p)
 }

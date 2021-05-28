@@ -2,6 +2,7 @@ package person
 
 import (
 	"encoding/binary"
+	"encoding/json"
 	"github.com/bearbin/go-age"
 	"github.com/golang/protobuf/proto"
 	"go-app-engine-demo/config"
@@ -20,7 +21,7 @@ type service struct {
 }
 
 //NewService create new service
-func NewService(r repository, hk string) *service {
+func NewService(r repository, hk string) UseCase {
 	return &service{
 		repo:    r,
 		hashKey: hk,
@@ -31,14 +32,12 @@ func NewService(r repository, hk string) *service {
 func (s *service) Store(p *entity.Person) error {
 	a := age.Age(p.BirthDate)
 	if a < 18 {
-		json, err := p.ToByteArray()
-		c := crypto.NewCrypto(s.hashKey, json)
-		err = c.Encrypt()
+		c, err := s.Encrypt(p)
 		if err != nil {
-			log.Print("Person encrypt failure")
+			log.Print("Person encrypt failed")
 			return err
 		}
-		log.Printf("Validating person with age less than 18: %s", c.GetEncryptRaw())
+		log.Printf("Validating person with age less than 18: %s", c)
 		err = s.personStoreValidation(p)
 		if err != nil {
 			log.Print("Person validation failed")
@@ -141,4 +140,18 @@ func (s *service) personStoreValidation(p *entity.Person) error {
 	}
 
 	return nil
+}
+
+func (s *service) Encrypt(p *entity.Person) (string, error) {
+	log.Print("Encrypting person")
+	data, err := json.Marshal(p)
+	if err != nil {
+		log.Print("Failed do marshal person")
+		return "", err
+	}
+
+	c := crypto.NewCrypto(s.hashKey, data)
+
+	err = c.Encrypt()
+	return c.GetEncryptRaw(), nil
 }

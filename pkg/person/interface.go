@@ -27,6 +27,10 @@ type batch interface {
 	StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person)
 }
 
+type encrypt interface {
+	Encrypt(p *entity.Person) (string, error)
+}
+
 //repository repository interface
 type repository interface {
 	reader
@@ -39,4 +43,5 @@ type UseCase interface {
 	writer
 	event
 	batch
+	encrypt
 }
