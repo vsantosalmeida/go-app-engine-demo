@@ -5,8 +5,10 @@ import (
 	"crypto/cipher"
 	"crypto/md5"
 	"crypto/rand"
+	"fmt"
 	"io"
 	"log"
+	"strings"
 )
 
 type Crypto struct {
@@ -70,6 +72,17 @@ func (c *Crypto) Decrypt() error {
 	return nil
 }
 
-func (c *Crypto) GetRaw() []byte {
+func (c *Crypto) GetEncryptRaw() string {
+	var b strings.Builder
+	for _, n := range c.Data {
+		fmt.Fprintf(&b, "%d,", n)
+	}
+	s := b.String()
+	s = s[:b.Len()-1]
+
+	return "[" + s + "]"
+}
+
+func (c *Crypto) GetDecryptRaw() []byte {
 	return c.Data
 }

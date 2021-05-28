@@ -1,9 +1,9 @@
 package config
 
-import "os"
-
-var ProjectId = os.Getenv("DATASTORE_PROJECT_ID")
-var HashKey = os.Getenv("HASH_KEY")
+import (
+	"log"
+	"os"
+)
 
 const (
 	DatastoreKind       = "Person"
@@ -13,4 +13,24 @@ const (
 	KafkaHost           = "localhost"
 	PearsonCreatedTopic = "PERSON_CREATED_EVENT"
 	SchemaId            = 1
+	projectId           = "DATASTORE_PROJECT_ID"
+	hashKey             = "HASH_KEY"
 )
+
+func GetProjectId() string {
+	id := os.Getenv(projectId)
+	if id == "" {
+		log.Panicf("%v must not be null", projectId)
+	}
+
+	return id
+}
+
+func GetHashKey() string {
+	hk := os.Getenv(hashKey)
+	if hk == "" {
+		log.Panicf("%v must not be null", hashKey)
+	}
+
+	return hk
+}

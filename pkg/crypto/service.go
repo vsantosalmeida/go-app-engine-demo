@@ -26,6 +26,6 @@ func (s *Service) Decrypt() error {
 	return nil
 }
 
-func (s *Service) GetRaw() []byte {
-	return s.crypt.GetRaw()
+func (s *Service) GetDecryptRaw() []byte {
+	return s.crypt.GetDecryptRaw()
 }

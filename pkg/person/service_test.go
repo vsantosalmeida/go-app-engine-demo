@@ -8,9 +8,11 @@ import (
 	"time"
 )
 
+const hk = "xpto"
+
 func TestService_Store(t *testing.T) {
 	repo := NewMemRepo()
-	svc := NewService(repo)
+	svc := NewService(repo, hk)
 	p := generatePerson()
 
 	t.Run("store", func(t *testing.T) {
@@ -56,7 +58,7 @@ func TestService_Store(t *testing.T) {
 
 func TestService_FindByKeyAndFindAll(t *testing.T) {
 	repo := NewMemRepo()
-	svc := NewService(repo)
+	svc := NewService(repo, hk)
 	p := generatePersonCollection()
 	svc.Store(p[0])
 	svc.Store(p[1])
@@ -81,7 +83,7 @@ func TestService_FindByKeyAndFindAll(t *testing.T) {
 
 func TestService_Delete(t *testing.T) {
 	repo := NewMemRepo()
-	svc := NewService(repo)
+	svc := NewService(repo, hk)
 	p := generatePersonCollection()
 	svc.Store(p[0])
 	p[1].ParentKey = p[0].Key

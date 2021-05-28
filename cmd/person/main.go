@@ -18,7 +18,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	client, err := datastore.NewClient(ctx, config.ProjectId)
+	client, err := datastore.NewClient(ctx, config.GetProjectId())
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -28,7 +28,7 @@ func main() {
 
 	personRepo := person.NewDataStoreRepository(client)
 	//producer, _ := stream.NewKafkaProducer()
-	personSvc := person.NewService(personRepo)
+	personSvc := person.NewService(personRepo, config.GetHashKey())
 
 	//handlers
 	n := negroni.New(

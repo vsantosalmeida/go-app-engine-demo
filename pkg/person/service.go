@@ -16,12 +16,14 @@ import (
 type service struct {
 	repo     repository
 	producer stream.Producer
+	hashKey  string
 }
 
 //NewService create new service
-func NewService(r repository) *service {
+func NewService(r repository, hk string) *service {
 	return &service{
-		repo: r,
+		repo:    r,
+		hashKey: hk,
 	}
 }
 
@@ -29,12 +31,14 @@ func NewService(r repository) *service {
 func (s *service) Store(p *entity.Person) error {
 	a := age.Age(p.BirthDate)
 	if a < 18 {
-		c := crypto.NewCrypto(config.HashKey, []byte(p.FirstName))
-		err := c.Encrypt()
+		json, err := p.ToByteArray()
+		c := crypto.NewCrypto(s.hashKey, json)
+		err = c.Encrypt()
 		if err != nil {
+			log.Print("Person encrypt failure")
 			return err
 		}
-		log.Printf("Validating person with age less than 18 Name: %v, BirthDate: %s", c.GetRaw(), p.BirthDate)
+		log.Printf("Validating person with age less than 18: %s", c.GetEncryptRaw())
 		err = s.personStoreValidation(p)
 		if err != nil {
 			log.Print("Person validation failed")

@@ -27,7 +27,7 @@ func decrypt() http.Handler {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		if err = json.NewEncoder(w).Encode(string(svc.GetRaw())); err != nil {
+		if err = json.NewEncoder(w).Encode(string(svc.GetDecryptRaw())); err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

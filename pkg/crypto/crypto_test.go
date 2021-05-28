@@ -20,7 +20,7 @@ func TestEncryptData(t *testing.T) {
 
 	//then
 	assert.Nil(t, err)
-	assert.NotEmptyf(t, c.GetRaw(), "Encrypt must return a encrypt with success")
+	assert.NotEmptyf(t, c.GetEncryptRaw(), "Encrypt must return a encrypt with success")
 }
 
 func TestEncrypt_DecryptData(t *testing.T) {
@@ -35,7 +35,7 @@ func TestEncrypt_DecryptData(t *testing.T) {
 		// when
 		err := c.Decrypt()
 		var decrypt *entity.Person
-		err = json.Unmarshal(c.GetRaw(), &decrypt)
+		err = json.Unmarshal(c.GetEncryptRaw(), &decrypt)
 
 		// then
 		assert.Equal(t, p, decrypt)
