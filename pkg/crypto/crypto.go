@@ -16,7 +16,7 @@ type Crypto struct {
 	Data []byte `json:"raw"`
 }
 
-func NewCrypto(key string, data []byte) DataCrypt {
+func NewCrypto(key string, data []byte) dataCrypt {
 	return &Crypto{
 		Key:  key,
 		Data: data,

@@ -2,16 +2,15 @@ package crypto
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"go-app-engine-demo/pkg/entity"
 	"testing"
-	"time"
 )
+
+const raw = `{"name": "test","last": "xpto"}`
 
 func TestEncryptData(t *testing.T) {
 	//given
-	data, _ := json.Marshal(generatePerson())
+	data, _ := json.Marshal(raw)
 	key := "person"
 	c := NewCrypto(key, data)
 
@@ -25,44 +24,16 @@ func TestEncryptData(t *testing.T) {
 
 func TestEncrypt_DecryptData(t *testing.T) {
 	// given
-	p := generatePerson()
-	data, _ := json.Marshal(p)
 	key := "person"
-	c := NewCrypto(key, data)
+	c := NewCrypto(key, []byte(raw))
 	_ = c.Encrypt()
 
 	t.Run("Success encrypt and decrypt person", func(t *testing.T) {
 		// when
 		err := c.Decrypt()
-		var decrypt *entity.Person
-		err = json.Unmarshal(c.GetEncryptRaw(), &decrypt)
 
 		// then
-		assert.Equal(t, p, decrypt)
 		assert.Nil(t, err)
+		assert.Equal(t, raw, string(c.GetDecryptRaw()))
 	})
-
-	t.Run("Failure to decrypt person", func(t *testing.T) {
-		// given
-		c.Key = "invalid"
-
-		//when
-		err := c.Decrypt()
-
-		//then
-		assert.Error(t, err)
-	})
-}
-
-func generatePerson() *entity.Person {
-	return &entity.Person{
-		Key:       uuid.New().String(),
-		FirstName: "Joaquim",
-		LastName:  "Barbosa",
-		BirthDate: time.Date(1990, 1, 1, 1, 1, 1, 1, time.UTC),
-		Address: entity.Address{
-			City:  "São Paulo",
-			State: "SP",
-		},
-	}
 }

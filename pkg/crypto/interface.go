@@ -1,6 +1,6 @@
 package crypto
 
-type DataCrypt interface {
+type dataCrypt interface {
 	createHash() []byte
 	Encrypt() error
 	Decrypt() error
@@ -8,12 +8,12 @@ type DataCrypt interface {
 	GetDecryptRaw() []byte
 }
 
-type CryptService interface {
+type cryptService interface {
 	Encrypt() error
 	Decrypt() error
 	GetDecryptRaw() []byte
 }
 
 type UseCase interface {
-	CryptService
+	cryptService
 }
