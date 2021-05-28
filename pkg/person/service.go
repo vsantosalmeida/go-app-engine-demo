@@ -32,19 +32,18 @@ func NewService(r repository, hk string) UseCase {
 func (s *service) Store(p *entity.Person) error {
 	a := age.Age(p.BirthDate)
 	if a < 18 {
-		c, err := s.encrypt(p)
-		if err != nil {
-			log.Print("Person encrypt failed")
-			return err
-		}
-		log.Printf("Validating person with age less than 18: %s", c)
-		err = s.personStoreValidation(p)
+		log.Print("Validating person with age less than 18")
+		err := s.personStoreValidation(p)
 		if err != nil {
 			log.Print("Person validation failed")
 			return err
 		}
 	}
 
+	c, err := s.encrypt(p)
+	if err == nil {
+		log.Printf("Person add successful: %s", c)
+	}
 	return s.repo.Store(p)
 }
 
@@ -153,5 +152,9 @@ func (s *service) encrypt(p *entity.Person) (string, error) {
 	c := crypto.NewCrypto(s.hashKey, data)
 
 	err = c.Encrypt()
+	if err != nil {
+		log.Print("Failed to encrypt person")
+		return "", err
+	}
 	return c.GetEncryptRaw(), nil
 }
