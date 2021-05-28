@@ -32,7 +32,7 @@ func NewService(r repository, hk string) UseCase {
 func (s *service) Store(p *entity.Person) error {
 	a := age.Age(p.BirthDate)
 	if a < 18 {
-		c, err := s.Encrypt(p)
+		c, err := s.encrypt(p)
 		if err != nil {
 			log.Print("Person encrypt failed")
 			return err
@@ -142,7 +142,7 @@ func (s *service) personStoreValidation(p *entity.Person) error {
 	return nil
 }
 
-func (s *service) Encrypt(p *entity.Person) (string, error) {
+func (s *service) encrypt(p *entity.Person) (string, error) {
 	log.Print("Encrypting person")
 	data, err := json.Marshal(p)
 	if err != nil {

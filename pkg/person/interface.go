@@ -28,7 +28,7 @@ type batch interface {
 }
 
 type encrypt interface {
-	Encrypt(p *entity.Person) (string, error)
+	encrypt(p *entity.Person) (string, error)
 }
 
 //repository repository interface

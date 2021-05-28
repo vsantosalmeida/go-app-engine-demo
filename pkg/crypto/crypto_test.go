@@ -20,7 +20,7 @@ func TestEncryptData(t *testing.T) {
 
 	//then
 	assert.Nil(t, err)
-	assert.NotEmptyf(t, c.GetEncryptRaw(), "Encrypt must return a encrypt with success")
+	assert.NotEmptyf(t, c.GetEncryptRaw(), "encrypt must return a encrypt with success")
 }
 
 func TestEncrypt_DecryptData(t *testing.T) {
