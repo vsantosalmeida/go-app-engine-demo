@@ -7,56 +7,78 @@ import (
 	"testing"
 )
 
-const (
-	hk                        = "xpto"
-	personNotFoundInMemReason = "person not found in memory"
-	personNotFoundReason      = "person not found"
-)
+const hk = "xpto"
+
+var firstPerson = &entity.Person{
+	Key:       uuid.New().String(),
+	FirstName: "Joaquim",
+	LastName:  "Barbosa",
+	BirthDate: "1990-01-29",
+	Address: entity.Address{
+		City:  "São Paulo",
+		State: "SP",
+	},
+}
+
+var secondPerson = &entity.Person{
+	Key:       uuid.New().String(),
+	FirstName: "Maria",
+	LastName:  "Souza",
+	BirthDate: "1999-03-22",
+	Address: entity.Address{
+		City:  "Salvador",
+		State: "BA",
+	},
+}
+
+var thirdPerson = &entity.Person{
+	Key:       uuid.New().String(),
+	FirstName: "Bilbo",
+	LastName:  "Bolseiro",
+	ParentKey: firstPerson.Key,
+	BirthDate: "2015-03-22",
+	Address: entity.Address{
+		City:  "Curitiba",
+		State: "PR",
+	},
+}
+
+var fourthPerson = &entity.Person{
+	Key:       uuid.New().String(),
+	FirstName: "Janaina",
+	LastName:  "Errada",
+	ParentKey: firstPerson.Key,
+	BirthDate: "2015/03/22 12:13",
+	Address: entity.Address{
+		City:  "Curitiba",
+		State: "PR",
+	},
+}
 
 func TestService_Store(t *testing.T) {
-	repo := NewMemRepo()
-	svc := NewService(repo, hk)
-	p := generatePerson()
+	var tests = []struct {
+		name        string
+		p1          *entity.Person
+		p2          *entity.Person
+		expectedErr error
+	}{
+		{name: "When try to store person should be success", p1: firstPerson, expectedErr: nil},
+		{name: "When try to store two persons wich one is age less than 18 and have a valid parent key should be success", p1: firstPerson, p2: thirdPerson, expectedErr: nil},
+		{name: "When try to store person with age less than 18 and dont has a valid parentKey must return err", p1: thirdPerson, expectedErr: NewErrValidatePerson("")},
+		{name: "When try to store person with an invalid birth date must return err", p1: fourthPerson, expectedErr: NewErrValidatePerson("")},
+	}
 
-	t.Run("store", func(t *testing.T) {
-		err := svc.Store(p)
-		assert.Nil(t, err)
-	})
-
-	t.Run("storeWithParentKey", func(t *testing.T) {
-		p2 := &entity.Person{
-			Key:       uuid.New().String(),
-			FirstName: "Marcio",
-			LastName:  "Cabra",
-			ParentKey: p.Key,
-			BirthDate: "2015-07-22",
-		}
-		err := svc.Store(p2)
-		assert.Nil(t, err)
-	})
-
-	t.Run("failToStore", func(t *testing.T) {
-		p2 := &entity.Person{
-			Key:       uuid.New().String(),
-			FirstName: "Marcio",
-			LastName:  "Cabra",
-			BirthDate: "2018-05-14",
-		}
-		err := svc.Store(p2)
-		assert.Equal(t, NewErrValidatePerson(personNotFoundReason), err)
-	})
-
-	t.Run("failToStoreUnknownParentKey", func(t *testing.T) {
-		p2 := &entity.Person{
-			Key:       uuid.New().String(),
-			FirstName: "Marcio",
-			LastName:  "Cabra",
-			BirthDate: "2015-03-22",
-			ParentKey: uuid.New().String(),
-		}
-		err := svc.Store(p2)
-		assert.Equal(t, NewErrValidatePerson(personNotFoundReason), err)
-	})
+	for _, tt := range tests {
+		repo := NewMemRepo()
+		svc := NewService(repo, hk)
+		t.Run(tt.name, func(t *testing.T) {
+			err := svc.Store(tt.p1)
+			if tt.p2 != nil {
+				err = svc.Store(tt.p2)
+			}
+			assert.IsType(t, err, tt.expectedErr)
+		})
+	}
 }
 
 func TestService_FindByKeyAndFindAll(t *testing.T) {
@@ -106,33 +128,8 @@ func TestService_Delete(t *testing.T) {
 	})
 }
 
-func generatePerson() *entity.Person {
-	return &entity.Person{
-		Key:       uuid.New().String(),
-		FirstName: "Joaquim",
-		LastName:  "Barbosa",
-		BirthDate: "1990-01-29",
-		Address: entity.Address{
-			City:  "São Paulo",
-			State: "SP",
-		},
-	}
-}
-
 func generatePersonCollection() []*entity.Person {
 	var persons []*entity.Person
-	p := generatePerson()
-	p2 := &entity.Person{
-		Key:       uuid.New().String(),
-		FirstName: "Maria",
-		LastName:  "Souza",
-		BirthDate: "1999-03-22",
-		Address: entity.Address{
-			City:  "Salvador",
-			State: "BA",
-		},
-	}
-
-	persons = append(persons, p, p2)
+	persons = append(persons, firstPerson, secondPerson)
 	return persons
 }

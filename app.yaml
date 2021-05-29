@@ -1,6 +1,6 @@
 runtime: go114
 
-main: ./api
+main: ./cmd/person
 
 env_variables:
   DATASTORE_PROJECT_ID: project
