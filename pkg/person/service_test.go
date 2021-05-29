@@ -69,9 +69,9 @@ func TestService_Store(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		repo := NewMemRepo()
-		svc := NewService(repo, hk)
 		t.Run(tt.name, func(t *testing.T) {
+			repo := NewMemRepo()
+			svc := NewService(repo, hk)
 			err := svc.Store(tt.p1)
 			if tt.p2 != nil {
 				err = svc.Store(tt.p2)
@@ -81,51 +81,64 @@ func TestService_Store(t *testing.T) {
 	}
 }
 
-func TestService_FindByKeyAndFindAll(t *testing.T) {
-	repo := NewMemRepo()
-	svc := NewService(repo, hk)
-	p := generatePersonCollection()
-	svc.Store(p[0])
-	svc.Store(p[1])
+func TestService_FindByKey(t *testing.T) {
+	var tests = []struct {
+		name        string
+		key         string
+		expectedErr error
+	}{
+		{"When a key exists for a person should return it", firstPerson.Key, nil},
+		{"When a key doesn't exists for a person must return err", secondPerson.Key, NewErrPersonNotFound("")},
+	}
 
-	t.Run("findByKey", func(t *testing.T) {
-		k, err := svc.FindByKey(p[0].Key)
-		assert.Nil(t, err)
-		assert.Equal(t, p[0].Key, k.Key)
-		assert.Equal(t, p[0].FirstName, k.FirstName)
-
-		k, err = svc.FindByKey("abc")
-		assert.Equal(t, NewErrPersonNotFound(personNotFoundInMemReason), err)
-		assert.Nil(t, k)
-	})
-
-	t.Run("findAll", func(t *testing.T) {
-		p2, err := svc.FindAll()
-		assert.Nil(t, err)
-		assert.Equal(t, 2, len(p2))
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := NewMemRepo()
+			svc := NewService(repo, hk)
+			_ = svc.Store(firstPerson)
+			p, err := svc.FindByKey(tt.key)
+			assert.IsType(t, tt.expectedErr, err)
+			if err == nil {
+				assert.Equal(t, p, firstPerson)
+			}
+		})
+	}
 }
 
 func TestService_Delete(t *testing.T) {
-	repo := NewMemRepo()
-	svc := NewService(repo, hk)
-	p := generatePersonCollection()
-	svc.Store(p[0])
-	p[1].ParentKey = p[0].Key
-	p[1].BirthDate = "2016-08-08"
-	svc.Store(p[1])
+	var tests = []struct {
+		name          string
+		p1            *entity.Person
+		p2            *entity.Person
+		p1ExpectedErr error
+		p2ExpectedErr error
+		p1Key         string
+		p2Key         string
+	}{
+		{name: "When delete a person which doesn't has a parent key associate to another person must delete it", p1: firstPerson, p1Key: firstPerson.Key},
+		{name: "When delete a person which has a parent key associate to another person must return err", p1: firstPerson, p1Key: firstPerson.Key, p1ExpectedErr: NewErrDeletePerson(""), p2: thirdPerson, p2Key: thirdPerson.Key},
+		{name: "When delete a person which the key isn't stored must return err", p1: firstPerson, p1Key: fourthPerson.Key, p1ExpectedErr: NewErrPersonNotFound("")},
+		{name: "When delete a person which a parent key associate must delete it and should be possible delete the ", p1: firstPerson, p1Key: thirdPerson.Key, p2: thirdPerson, p2Key: firstPerson.Key},
+	}
 
-	t.Run("deleteFail", func(t *testing.T) {
-		err := svc.Delete(p[0].Key)
-		assert.Equal(t, NewErrDeletePerson("person has the key associate to another person"), err)
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := NewMemRepo()
+			svc := NewService(repo, hk)
+			_ = svc.Store(tt.p1)
+			if tt.p2 != nil {
+				_ = svc.Store(tt.p2)
+			}
 
-	t.Run("delete", func(t *testing.T) {
-		err := svc.Delete(p[1].Key)
-		assert.Nil(t, err)
-		err = svc.Delete(p[0].Key)
-		assert.Nil(t, err)
-	})
+			err := svc.Delete(tt.p1Key)
+			assert.IsType(t, tt.p1ExpectedErr, err)
+
+			if tt.p2 != nil {
+				err = svc.Delete(tt.p2Key)
+				assert.IsType(t, tt.p2ExpectedErr, err)
+			}
+		})
+	}
 }
 
 func generatePersonCollection() []*entity.Person {

@@ -71,6 +71,7 @@ func (s *service) IsKeyAssociated(pk string) (bool, error) {
 
 //Delete a person
 func (s *service) Delete(k string) error {
+	log.Printf("Deleting person key:%s", k)
 	p, err := s.FindByKey(k)
 	if err != nil {
 		return err
@@ -78,12 +79,14 @@ func (s *service) Delete(k string) error {
 
 	a, err := s.getPersonAge(p.BirthDate)
 	if err != nil {
+		log.Printf("Err to get person %s age reason: %q", k, err)
 		return NewErrDeletePerson(err.Error())
 	}
 	if a > 18 {
 		// ok means the Person has a < 18 active Person
 		ok, err := s.IsKeyAssociated(p.Key)
 		if ok || err != nil {
+			log.Printf("Err to delete person, reason: person has a the key:%s associate to another person", k)
 			return NewErrDeletePerson("person has the key associate to another person")
 		}
 	}
