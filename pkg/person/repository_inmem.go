@@ -23,7 +23,7 @@ func (r *MemRepo) Store(p *entity.Person) error {
 
 func (r *MemRepo) Delete(k string) error {
 	if r.m[k] == nil {
-		return NewErrPersonNotFound()
+		return NewErrPersonNotFound("person not found in memory")
 	}
 	delete(r.m, k)
 
@@ -42,7 +42,7 @@ func (r *MemRepo) FindAll() ([]*entity.Person, error) {
 
 func (r *MemRepo) FindByKey(k string) (*entity.Person, error) {
 	if r.m[k] == nil {
-		return nil, NewErrPersonNotFound()
+		return nil, NewErrPersonNotFound("person not found in memory")
 	}
 
 	return r.m[k], nil

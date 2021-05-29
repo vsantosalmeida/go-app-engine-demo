@@ -6,10 +6,10 @@ option go_package = ".;protobuf";
 
 message Person {
     string key = 1;
-    string firstName = 2;
-    string lastName = 3;
-    int64 birthDate = 4;
-    string parentKey = 5;
+    string first_name = 2;
+    string last_name = 3;
+    string birth_date = 4;
+    string parent_key = 5;
     Address address = 6;
 }
 

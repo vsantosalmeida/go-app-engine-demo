@@ -1,5 +1,7 @@
 package person
 
+import "fmt"
+
 type ErrPersonNotFound struct {
 	msg string
 }
@@ -18,20 +20,20 @@ type ErrDeletePerson struct {
 
 func (e *ErrDeletePerson) Error() string { return e.msg }
 
-func NewErrPersonNotFound() *ErrPersonNotFound {
+func NewErrPersonNotFound(reason string) *ErrPersonNotFound {
 	return &ErrPersonNotFound{
-		msg: "person not found",
+		msg: fmt.Sprintf("person not found reason=%s", reason),
 	}
 }
 
-func NewErrValidatePerson() *ErrValidatePerson {
+func NewErrValidatePerson(reason string) *ErrValidatePerson {
 	return &ErrValidatePerson{
-		msg: "person with age less than 18 must have a valid parentkey",
+		msg: fmt.Sprintf("failed to validate person reason=%s", reason),
 	}
 }
 
-func NewErrDeletePerson() *ErrDeletePerson {
+func NewErrDeletePerson(reason string) *ErrDeletePerson {
 	return &ErrDeletePerson{
-		msg: "couldn't delete a person with an active parentkey",
+		msg: fmt.Sprintf("couldn't delete person reason=%s", reason),
 	}
 }

@@ -9,7 +9,6 @@ import (
 	"go-app-engine-demo/pkg/crypto"
 	"go-app-engine-demo/pkg/entity"
 	"go-app-engine-demo/pkg/stream"
-	"go-app-engine-demo/protobuf"
 	"log"
 )
 
@@ -30,19 +29,16 @@ func NewService(r repository, hk string) UseCase {
 
 //Store a person
 func (s *service) Store(p *entity.Person) error {
-	a := age.Age(p.BirthDate)
-	if a < 18 {
-		log.Print("Validating person with age less than 18")
-		err := s.personStoreValidation(p)
-		if err != nil {
-			log.Print("Person validation failed")
-			return err
-		}
+	log.Print("Validating person")
+	err := s.personStoreValidation(p)
+	if err != nil {
+		log.Print("Person validation failed")
+		return err
 	}
 
 	c, err := s.encrypt(p)
 	if err == nil {
-		log.Printf("Person add successful: %s", c)
+		log.Printf("Saving person: %s to database", c)
 	}
 	return s.repo.Store(p)
 }
@@ -80,20 +76,23 @@ func (s *service) Delete(k string) error {
 		return err
 	}
 
-	a := age.Age(p.BirthDate)
+	a, err := s.getPersonAge(p.BirthDate)
+	if err != nil {
+		return NewErrDeletePerson(err.Error())
+	}
 	if a > 18 {
 		// ok means the Person has a < 18 active Person
 		ok, err := s.IsKeyAssociated(p.Key)
 		if ok || err != nil {
-			return NewErrDeletePerson()
+			return NewErrDeletePerson("person has the key associate to another person")
 		}
 	}
 
 	return s.repo.Delete(k)
 }
 
-func (s *service) CreateEvent(p *entity.Person) error {
-	message := mapPersonToMessage(p)
+func (s *service) createEvent(p *entity.Person) error {
+	message := mapPersonToProto(p)
 	messageBytes, err := proto.Marshal(message)
 	if err != nil {
 		return err
@@ -113,32 +112,29 @@ func (s *service) CreateEvent(p *entity.Person) error {
 	return s.producer.Write(recordValue, config.PearsonCreatedTopic)
 }
 
-func mapPersonToMessage(p *entity.Person) *protobuf.Person {
-	address := &protobuf.Address{
-		City:  p.Address.City,
-		State: p.Address.State,
-	}
-
-	return &protobuf.Person{
-		Key:       p.Key,
-		FirstName: p.FirstName,
-		LastName:  p.LastName,
-		BirthDate: p.BirthDate.Unix(),
-		ParentKey: p.ParentKey,
-		Address:   address,
-	}
-}
-
 func (s *service) personStoreValidation(p *entity.Person) error {
-	a := age.Age(p.BirthDate)
+	a, err := s.getPersonAge(p.BirthDate)
+	if err != nil {
+		return NewErrValidatePerson(err.Error())
+	}
 	if a < 18 {
+		log.Printf("Validating person with age less than 18")
 		_, err := s.FindByKey(p.ParentKey)
 		if err != nil {
-			return NewErrValidatePerson()
+			return err
 		}
 	}
 
 	return nil
+}
+
+func (s *service) getPersonAge(bd string) (int, error) {
+	t, err := parsePersonBirthDate(bd)
+	if err != nil {
+		return 0, err
+	}
+
+	return age.Age(t), nil
 }
 
 func (s *service) encrypt(p *entity.Person) (string, error) {
