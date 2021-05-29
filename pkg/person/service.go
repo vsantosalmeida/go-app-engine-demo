@@ -121,7 +121,7 @@ func (s *service) personStoreValidation(p *entity.Person) error {
 		log.Printf("Validating person with age less than 18")
 		_, err := s.FindByKey(p.ParentKey)
 		if err != nil {
-			return err
+			return NewErrValidatePerson("person not found")
 		}
 	}
 
