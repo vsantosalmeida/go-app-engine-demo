@@ -48,7 +48,7 @@ func (r *MemRepo) FindByKey(k string) (*entity.Person, error) {
 	return r.m[k], nil
 }
 
-func (r *MemRepo) IsKeyAssociated(pk string) (bool, error) {
+func (r *MemRepo) isKeyAssociated(pk string) (bool, error) {
 	for _, v := range r.m {
 		if v.ParentKey == pk {
 			return true, nil

@@ -65,8 +65,8 @@ func (s *service) FindAll() ([]*entity.Person, error) {
 	return s.repo.FindAll()
 }
 
-func (s *service) IsKeyAssociated(pk string) (bool, error) {
-	return s.repo.IsKeyAssociated(pk)
+func (s *service) isKeyAssociated(pk string) (bool, error) {
+	return s.repo.isKeyAssociated(pk)
 }
 
 //Delete a person
@@ -84,7 +84,7 @@ func (s *service) Delete(k string) error {
 	}
 	if a > 18 {
 		// ok means the Person has a < 18 active Person
-		ok, err := s.IsKeyAssociated(p.Key)
+		ok, err := s.isKeyAssociated(p.Key)
 		if ok || err != nil {
 			log.Printf("Err to delete person, reason: person has a the key:%s associate to another person", k)
 			return NewErrDeletePerson("person has the key associate to another person")

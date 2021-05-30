@@ -9,7 +9,7 @@ import (
 type reader interface {
 	FindAll() ([]*entity.Person, error)
 	FindByKey(k string) (*entity.Person, error)
-	IsKeyAssociated(pk string) (bool, error)
+	isKeyAssociated(pk string) (bool, error)
 }
 
 //writer person writer

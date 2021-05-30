@@ -56,8 +56,6 @@ var fourthPerson = &entity.Person{
 	},
 }
 
-var b []*entity.Person
-
 func TestService_Store(t *testing.T) {
 	var tests = []struct {
 		name        string
@@ -188,6 +186,31 @@ func TestService_StoreMulti(t *testing.T) {
 
 			assert.Equal(t, totalSuccess, tt.success)
 			assert.Equal(t, totalFail, tt.fail)
+		})
+	}
+}
+
+func TestServiceIsKeyAssociated(t *testing.T) {
+	var tests = []struct {
+		name   string
+		key    string
+		expect bool
+	}{
+		{name: "When check an associated key of a person must return true", key: firstPerson.Key, expect: true},
+		{name: "When check a not associated key of a person must return false", key: secondPerson.Key, expect: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := NewMemRepo()
+			svc := NewService(repo, hk)
+			_ = svc.Store(firstPerson)
+			_ = svc.Store(secondPerson)
+			_ = svc.Store(thirdPerson)
+
+			got, _ := svc.isKeyAssociated(tt.key)
+
+			assert.Equal(t, got, tt.expect)
 		})
 	}
 }
