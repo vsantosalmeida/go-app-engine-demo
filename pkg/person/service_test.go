@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"go-app-engine-demo/pkg/entity"
+	"sync"
 	"testing"
 )
 
@@ -54,6 +55,8 @@ var fourthPerson = &entity.Person{
 		State: "PR",
 	},
 }
+
+var b []*entity.Person
 
 func TestService_Store(t *testing.T) {
 	var tests = []struct {
@@ -141,8 +144,50 @@ func TestService_Delete(t *testing.T) {
 	}
 }
 
-func generatePersonCollection() []*entity.Person {
-	var persons []*entity.Person
-	persons = append(persons, firstPerson, secondPerson)
-	return persons
+func TestService_StoreMulti(t *testing.T) {
+	var tests = []struct {
+		name    string
+		success int
+		fail    int
+		b       []*entity.Person
+	}{
+		{name: "When receive a batch with correct persons must store it", success: 3, fail: 0, b: []*entity.Person{firstPerson, secondPerson, thirdPerson}},
+		{name: "When receive a batch with some incorrect persons must have error", success: 2, fail: 2, b: []*entity.Person{thirdPerson, secondPerson, firstPerson, fourthPerson}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var wg sync.WaitGroup
+			wg.Add(len(tt.b))
+			repo := NewMemRepo()
+			svc := NewService(repo, hk)
+			s := make(chan *entity.Person)
+			f := make(chan *entity.Person)
+			d := make(chan bool)
+			var totalSuccess int
+			var totalFail int
+
+			go svc.StoreMulti(tt.b, s, f)
+
+			go func() {
+				for {
+					select {
+					case <-s:
+						totalSuccess++
+						wg.Done()
+					case <-f:
+						totalFail++
+						wg.Done()
+					case <-d:
+						return
+					}
+				}
+			}()
+			wg.Wait()
+			d <- true
+
+			assert.Equal(t, totalSuccess, tt.success)
+			assert.Equal(t, totalFail, tt.fail)
+		})
+	}
 }
