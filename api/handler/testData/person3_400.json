@@ -1,0 +1,9 @@
+{
+  "firstName": "Chupeta",
+  "lastName": "Mix",
+  "birthDate": "2000/07/30",
+  "address": {
+    "city": "São Paulo",
+    "state": "SP"
+  }
+}

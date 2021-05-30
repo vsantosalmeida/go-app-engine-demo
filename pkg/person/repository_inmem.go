@@ -5,7 +5,8 @@ import (
 )
 
 type MemRepo struct {
-	m map[string]*entity.Person
+	m       map[string]*entity.Person
+	StubErr error
 }
 
 func NewMemRepo() *MemRepo {
@@ -17,6 +18,9 @@ func NewMemRepo() *MemRepo {
 
 // Store writer implementation
 func (r *MemRepo) Store(p *entity.Person) error {
+	if r.StubErr != nil {
+		return r.StubErr
+	}
 	r.m[p.Key] = p
 	return nil
 }

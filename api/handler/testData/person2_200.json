@@ -1,0 +1,10 @@
+{
+  "firstName": "Sarama",
+  "lastName": "Poser",
+  "birthDate": "2015-07-30",
+  "parentKey": "xpto",
+  "address": {
+    "city": "São Paulo",
+    "state": "SP"
+  }
+}
