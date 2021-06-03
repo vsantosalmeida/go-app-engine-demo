@@ -18,7 +18,7 @@ type dataStoreRepository struct {
 	client *datastore.Client
 }
 
-func NewDataStoreRepository(c *datastore.Client) repository {
+func NewDataStoreRepository(c *datastore.Client) Repository {
 	return &dataStoreRepository{
 		client: c,
 	}

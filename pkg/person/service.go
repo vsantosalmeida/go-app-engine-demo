@@ -14,13 +14,13 @@ import (
 
 //service service interface
 type service struct {
-	repo     repository
+	repo     Repository
 	producer stream.Producer
 	hashKey  string
 }
 
 //NewService create new service
-func NewService(r repository, hk string) UseCase {
+func NewService(r Repository, hk string) UseCase {
 	return &service{
 		repo:    r,
 		hashKey: hk,

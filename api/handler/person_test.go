@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"go-app-engine-demo/api/dto"
 	"go-app-engine-demo/pkg/entity"
@@ -21,7 +22,7 @@ const (
 	ct = "application/json"
 )
 
-var per = &entity.Person{
+var firstPerson = &entity.Person{
 	Key:       "xpto",
 	FirstName: "Joaquim",
 	LastName:  "Barbosa",
@@ -30,6 +31,25 @@ var per = &entity.Person{
 		City:  "São Paulo",
 		State: "SP",
 	},
+}
+
+var secondPerson = &entity.Person{
+	Key:       "xpto1",
+	FirstName: "Bilbo",
+	LastName:  "Bolseiro",
+	BirthDate: "2010-01-29",
+	ParentKey: firstPerson.Key,
+	Address: entity.Address{
+		City:  "São Paulo",
+		State: "SP",
+	},
+}
+
+func setup() (r *person.MemRepo, svc person.UseCase) {
+	r = person.NewMemRepo()
+	svc = person.NewService(r, hk)
+	_ = svc.Store(firstPerson)
+	return
 }
 
 func TestPersonAddEndpoint(t *testing.T) {
@@ -50,10 +70,8 @@ func TestPersonAddEndpoint(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := person.NewMemRepo()
+			r, svc := setup()
 			r.StubErr = tt.memRepoErr
-			svc := person.NewService(r, hk)
-			_ = svc.Store(per)
 
 			ts := httptest.NewServer(personAdd(svc))
 			var p *entity.Person
@@ -101,9 +119,7 @@ func TestPersonMultiAddEndpoint(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := person.NewMemRepo()
-			svc := person.NewService(r, hk)
-			_ = svc.Store(per)
+			_, svc := setup()
 
 			ts := httptest.NewServer(personMultiAdd(svc))
 			var batch dto.PersonBatch
@@ -125,6 +141,42 @@ func TestPersonMultiAddEndpoint(t *testing.T) {
 
 			assert.Equal(t, tt.success, len(batch.S))
 			assert.Equal(t, tt.failure, len(batch.F))
+		})
+	}
+}
+
+func TestPersonDeleteEndpoint(t *testing.T) {
+	var tests = []struct {
+		name       string
+		key        string
+		statusCode int
+	}{
+		{name: "When receive a valid key must delete the person and return 204 no content", key: firstPerson.Key, statusCode: http.StatusNoContent},
+		{name: "When try to delete a person with a parent key associated must return 409 conflict", key: firstPerson.Key, statusCode: http.StatusConflict},
+		{name: "When try to delete a person not stored must return 404 not found", key: "unknownKey", statusCode: http.StatusNotFound},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, svc := setup()
+			if tt.statusCode == http.StatusConflict {
+				_ = svc.Store(secondPerson)
+			}
+
+			rr := httptest.NewRecorder()
+			handler := deletePerson(svc)
+
+			req, err := http.NewRequest(http.MethodDelete, "/person/"+tt.key, http.NoBody)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			router := mux.NewRouter()
+			router.Handle("/person/{key}", handler)
+			router.ServeHTTP(rr, req)
+
+			assert.Equal(t, tt.statusCode, rr.Code)
+			assert.Nil(t, err)
 		})
 	}
 }

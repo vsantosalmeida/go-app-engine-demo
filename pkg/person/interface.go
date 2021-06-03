@@ -37,9 +37,9 @@ type encrypt interface {
 	encrypt(p *entity.Person) (string, error)
 }
 
-//repository repository interface
+//Repository Repository interface
 //any database system must implement these interfaces
-type repository interface {
+type Repository interface {
 	reader
 	writer
 }
