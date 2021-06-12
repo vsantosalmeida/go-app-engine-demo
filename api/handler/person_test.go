@@ -61,10 +61,10 @@ func TestPersonAddEndpoint(t *testing.T) {
 		memRepoErr error
 	}{
 		{name: "When request has a correct person body must return created 201", file: "person1_201.json", statusCode: http.StatusCreated},
-		{name: "When request has a person <18 with a valid parent key must return created 201", file: "person2_201.json", statusCode: http.StatusCreated},
+		{name: "When request has a person <18 with a valid parent firstKey must return created 201", file: "person2_201.json", statusCode: http.StatusCreated},
 		{name: "When request hasn't a correct person body must return bad request 400", file: "person1_400.json", statusCode: http.StatusBadRequest, expectErr: true},
-		{name: "When request has a person <18 without a valid parent key must return bad request 400", file: "person2_400.json", statusCode: http.StatusBadRequest, expectErr: true},
-		{name: "When request has a person with an invalid birth date key must return bad request 400", file: "person3_400.json", statusCode: http.StatusBadRequest, expectErr: true},
+		{name: "When request has a person <18 without a valid parent firstKey must return bad request 400", file: "person2_400.json", statusCode: http.StatusBadRequest, expectErr: true},
+		{name: "When request has a person with an invalid birth date firstKey must return bad request 400", file: "person3_400.json", statusCode: http.StatusBadRequest, expectErr: true},
 		{name: "When request has a person but receive an unknown err must return internal server error 500", file: "person1_201.json", statusCode: http.StatusInternalServerError, expectErr: true, memRepoErr: context.DeadlineExceeded},
 	}
 
@@ -151,15 +151,16 @@ func TestPersonDeleteEndpoint(t *testing.T) {
 		key        string
 		statusCode int
 	}{
-		{name: "When receive a valid key must delete the person and return 204 no content", key: firstPerson.Key, statusCode: http.StatusNoContent},
-		{name: "When try to delete a person with a parent key associated must return 409 conflict", key: firstPerson.Key, statusCode: http.StatusConflict},
+		{name: "When receive a valid firstKey must delete the person and return 204 no content", key: firstPerson.Key, statusCode: http.StatusNoContent},
+		{name: "When try to delete a person with a parent firstKey associated must return 409 conflict", key: firstPerson.Key, statusCode: http.StatusConflict},
 		{name: "When try to delete a person not stored must return 404 not found", key: "unknownKey", statusCode: http.StatusNotFound},
+		{name: "When try to delete a person which the parent firstKey is associate must delete the person and return 204 no content", key: secondPerson.Key, statusCode: http.StatusNoContent},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, svc := setup()
-			if tt.statusCode == http.StatusConflict {
+			if tt.key == secondPerson.Key || tt.statusCode == http.StatusConflict {
 				_ = svc.Store(secondPerson)
 			}
 
