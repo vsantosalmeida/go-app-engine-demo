@@ -12,7 +12,8 @@ const (
 	BootstrapServers    = "bootstrap.servers"
 	KafkaHost           = "localhost"
 	PearsonCreatedTopic = "PERSON_CREATED_EVENT"
-	SchemaId            = 1
+	SchemaRegistryHost  = "http://localhost:8084"
+	PersonSubjName      = "PERSON_CREATED_EVENT-value"
 	projectId           = "DATASTORE_PROJECT_ID"
 	hashKey             = "HASH_KEY"
 )

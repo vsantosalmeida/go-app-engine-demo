@@ -1,7 +1,6 @@
 package person
 
 import (
-	"encoding/binary"
 	"encoding/json"
 	"github.com/bearbin/go-age"
 	"github.com/golang/protobuf/proto"
@@ -20,10 +19,11 @@ type service struct {
 }
 
 //NewService create new service
-func NewService(r Repository, hk string) UseCase {
+func NewService(r Repository, p stream.Producer, hk string) UseCase {
 	return &service{
-		repo:    r,
-		hashKey: hk,
+		repo:     r,
+		producer: p,
+		hashKey:  hk,
 	}
 }
 
@@ -40,7 +40,13 @@ func (s *service) Store(p *entity.Person) error {
 	if err == nil {
 		log.Printf("Saving person: %s to database", c)
 	}
+
+	err = s.createEvent(p)
+	if err != nil {
+		log.Print("Failed to send event to stream")
+	}
 	return s.repo.Store(p)
+
 }
 
 // StoreMulti batch TODO método deve retornar algum erro em caso de falha
@@ -95,23 +101,16 @@ func (s *service) Delete(k string) error {
 }
 
 func (s *service) createEvent(p *entity.Person) error {
+	log.Print("event received")
 	message := mapPersonToProto(p)
 	messageBytes, err := proto.Marshal(message)
 	if err != nil {
 		return err
 	}
 
-	//TODO encapular método único para fazer bind do schemID com a mensagem
-	// TODO implementar método para utilizar a API do schema registry
-	schemaIDBytes := make([]byte, 4)
-	binary.BigEndian.PutUint32(schemaIDBytes, uint32(config.SchemaId))
+	recordValue := s.producer.ToProtoBytes(messageBytes, config.PersonSubjName)
 
-	var recordValue []byte
-	recordValue = append(recordValue, byte(0))
-	recordValue = append(recordValue, schemaIDBytes...)
-	recordValue = append(recordValue, byte(0))
-	recordValue = append(recordValue, messageBytes...)
-
+	log.Print("sending event to stream")
 	return s.producer.Write(recordValue, config.PearsonCreatedTopic)
 }
 

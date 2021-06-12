@@ -1,14 +1,17 @@
 package stream
 
 import (
+	"encoding/binary"
 	"fmt"
 	"go-app-engine-demo/config"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
+	"log"
 )
 
 // kafkaProducer contains the kafka producer client
 type kafkaProducer struct {
 	client *kafka.Producer
+	srAPI  SchemaRegistry
 }
 
 func NewKafkaProducer() (Producer, error) {
@@ -21,7 +24,10 @@ func NewKafkaProducer() (Producer, error) {
 		return nil, err
 	}
 
-	return &kafkaProducer{client: p}, nil
+	return &kafkaProducer{
+		client: p,
+		srAPI:  NewSchemaRegistryAPI(),
+	}, nil
 }
 
 func (k *kafkaProducer) Write(msg []byte, topic string) error {
@@ -56,4 +62,22 @@ func (k *kafkaProducer) Close() {
 	k.client.Flush(1000)
 
 	k.client.Close()
+}
+
+func (k *kafkaProducer) ToProtoBytes(messageBytes []byte, sbj string) []byte {
+	schemaIDBytes := make([]byte, 4)
+	schemaID, err := k.srAPI.GetSchemaID(sbj)
+	if err != nil {
+		log.Printf("failed to retrieve schemaID err:%q", err)
+	}
+
+	binary.BigEndian.PutUint32(schemaIDBytes, uint32(schemaID))
+
+	var recordValue []byte
+	recordValue = append(recordValue, byte(0))
+	recordValue = append(recordValue, schemaIDBytes...)
+	recordValue = append(recordValue, byte(0))
+	recordValue = append(recordValue, messageBytes...)
+
+	return recordValue
 }
