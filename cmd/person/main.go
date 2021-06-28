@@ -5,11 +5,12 @@ import (
 	"context"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
+	"github.com/vsantosalmeida/go-grpc-server/protobuf"
 	"go-app-engine-demo/api/handler"
 	"go-app-engine-demo/config"
 	"go-app-engine-demo/pkg/midleware"
 	"go-app-engine-demo/pkg/person"
-	"go-app-engine-demo/pkg/stream"
+	"google.golang.org/grpc"
 	"log"
 	"net/http"
 	"os"
@@ -28,8 +29,18 @@ func main() {
 	router := mux.NewRouter()
 
 	personRepo := person.NewDataStoreRepository(client)
-	producer, _ := stream.NewKafkaProducer()
-	personSvc := person.NewService(personRepo, producer, config.GetHashKey())
+
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithInsecure())
+
+	conn, err := grpc.Dial(config.GrpcServerHost, opts...)
+	if err != nil {
+		log.Fatalf("failed to dial to grpc server: %v", err)
+	}
+
+	rpcClient := protobuf.NewPersonReceiverClient(conn)
+
+	personSvc := person.NewService(personRepo, rpcClient, config.GetHashKey())
 
 	//handlers
 	n := negroni.New(

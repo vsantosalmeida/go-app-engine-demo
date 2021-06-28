@@ -1,29 +1,29 @@
 package person
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/bearbin/go-age"
-	"github.com/golang/protobuf/proto"
-	"go-app-engine-demo/config"
+	"github.com/vsantosalmeida/go-grpc-server/protobuf"
 	"go-app-engine-demo/pkg/crypto"
 	"go-app-engine-demo/pkg/entity"
-	"go-app-engine-demo/pkg/stream"
+	"google.golang.org/grpc"
 	"log"
 )
 
 //service service interface
 type service struct {
-	repo     Repository
-	producer stream.Producer
-	hashKey  string
+	repo    Repository
+	client  protobuf.PersonReceiverClient
+	hashKey string
 }
 
 //NewService create new service
-func NewService(r Repository, p stream.Producer, hk string) UseCase {
+func NewService(r Repository, client protobuf.PersonReceiverClient, hk string) UseCase {
 	return &service{
-		repo:     r,
-		producer: p,
-		hashKey:  hk,
+		repo:    r,
+		client:  client,
+		hashKey: hk,
 	}
 }
 
@@ -41,11 +41,17 @@ func (s *service) Store(p *entity.Person) error {
 		log.Printf("Saving person: %s to database", c)
 	}
 
-	err = s.createEvent(p)
-	if err != nil {
-		log.Print("Failed to send event to stream")
+	err = s.repo.Store(p)
+	if err == nil {
+		go func() {
+			log.Printf("Creating person event")
+			err := s.createEvent(p)
+			if err != nil {
+				log.Printf("Failed to create event: %q", err)
+			}
+		}()
 	}
-	return s.repo.Store(p)
+	return err
 
 }
 
@@ -101,17 +107,18 @@ func (s *service) Delete(k string) error {
 }
 
 func (s *service) createEvent(p *entity.Person) error {
-	log.Print("event received")
-	message := mapPersonToProto(p)
-	messageBytes, err := proto.Marshal(message)
+	log.Print("Event received")
+	m := mapPersonToProto(p)
+
+	var opts []grpc.CallOption
+	r, err := s.client.CreateEvent(context.Background(), m, opts...)
 	if err != nil {
+		log.Printf("Failed to send grpc event: %q", err)
 		return err
 	}
 
-	recordValue := s.producer.ToProtoBytes(messageBytes, config.PersonSubjName)
-
-	log.Print("sending event to stream")
-	return s.producer.Write(recordValue, config.PearsonCreatedTopic)
+	log.Printf("Success to send grpc event, reply: %v", r)
+	return nil
 }
 
 func (s *service) personStoreValidation(p *entity.Person) error {

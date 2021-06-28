@@ -6,16 +6,12 @@ import (
 )
 
 const (
-	DatastoreKind       = "Person"
-	PersonApiPort       = 8080
-	CryptoApiPort       = 8082
-	BootstrapServers    = "bootstrap.servers"
-	KafkaHost           = "localhost"
-	PearsonCreatedTopic = "PERSON_CREATED_EVENT"
-	SchemaRegistryHost  = "http://localhost:8084"
-	PersonSubjName      = "PERSON_CREATED_EVENT-value"
-	projectId           = "DATASTORE_PROJECT_ID"
-	hashKey             = "HASH_KEY"
+	DatastoreKind  = "Person"
+	PersonApiPort  = 8080
+	CryptoApiPort  = 8082
+	GrpcServerHost = "localhost:9090"
+	projectId      = "DATASTORE_PROJECT_ID"
+	hashKey        = "HASH_KEY"
 )
 
 func GetProjectId() string {

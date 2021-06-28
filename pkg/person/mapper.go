@@ -1,8 +1,8 @@
 package person
 
 import (
+	"github.com/vsantosalmeida/go-grpc-server/protobuf"
 	"go-app-engine-demo/pkg/entity"
-	"go-app-engine-demo/protobuf"
 	"log"
 	"time"
 )
