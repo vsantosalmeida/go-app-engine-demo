@@ -15,4 +15,4 @@ FROM alpine
 WORKDIR /root/
 COPY --from=builder /go/src/vsantosalmeida/go-app-engine-demo/bin/person-api.bin .
 EXPOSE 8080
-CMD ["./person-api"]
+CMD ["./person-api.bin"]

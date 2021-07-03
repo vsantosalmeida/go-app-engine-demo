@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: go-job
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: go-job
+              image: larolman/go-job:latest
+              imagePullPolicy: Always
+              envFrom:
+                - secretRef:
+                    name: commom-secret
+              command: ["./job.bin"]
+          restartPolicy: OnFailure

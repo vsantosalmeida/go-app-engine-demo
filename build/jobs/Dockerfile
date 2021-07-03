@@ -14,5 +14,3 @@ RUN make build-job
 FROM alpine
 WORKDIR /root/
 COPY --from=builder /go/src/vsantosalmeida/go-app-engine-demo/bin/job.bin .
-EXPOSE 8080
-CMD ["./person-api"]

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-person-api
+  labels:
+    app: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: go-person-api
+          image: larolman/go-person-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: commom-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-person-api
+spec:
+  selector:
+    app: api
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 8080
+      nodePort: 30000

@@ -48,6 +48,13 @@ push-crypto-api-docker-image:
 	@ docker login
 	@ docker push $(DOCKER_REPO)/go-crypto-api:latest
 
+build-datastore-docker:
+	@ docker build --no-cache -t larolman/datastore ./build/datastore-emulator
+
+push-datastore-image:
+	@ docker login
+	@ docker push $(DOCKER_REPO)/datastore:latest
+
 set-project:
 	@ sed -i "s/project/${PROJECT}/g" app.yaml
 
