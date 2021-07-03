@@ -2,11 +2,13 @@ package jobs
 
 import (
 	"context"
-	"github.com/vsantosalmeida/go-grpc-server/protobuf"
-	"go-app-engine-demo/pkg/entity"
-	"go-app-engine-demo/pkg/person"
-	"google.golang.org/grpc"
 	"log"
+
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/entity"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/person"
+	"github.com/vsantosalmeida/go-grpc-server/protobuf"
+
+	"google.golang.org/grpc"
 )
 
 type job struct {

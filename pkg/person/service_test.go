@@ -1,11 +1,12 @@
 package person
 
 import (
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
-	"go-app-engine-demo/pkg/entity"
 	"sync"
 	"testing"
+
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/entity"
 )
 
 const hk = "xpto"

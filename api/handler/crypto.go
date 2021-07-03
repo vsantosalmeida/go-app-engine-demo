@@ -2,11 +2,12 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/codegangsta/negroni"
-	"github.com/gorilla/mux"
-	"go-app-engine-demo/pkg/crypto"
 	"log"
 	"net/http"
+
+	"github.com/codegangsta/negroni"
+	"github.com/gorilla/mux"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/crypto"
 )
 
 func decrypt() http.Handler {

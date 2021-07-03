@@ -5,16 +5,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
-	"go-app-engine-demo/api/dto"
-	"go-app-engine-demo/pkg/entity"
-	"go-app-engine-demo/pkg/person"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
+	"github.com/vsantosalmeida/go-app-engine-demo/api/dto"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/entity"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/person"
 )
 
 const (

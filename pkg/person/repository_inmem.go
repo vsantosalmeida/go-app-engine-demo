@@ -1,7 +1,7 @@
 package person
 
 import (
-	"go-app-engine-demo/pkg/entity"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/entity"
 )
 
 type MemRepo struct {

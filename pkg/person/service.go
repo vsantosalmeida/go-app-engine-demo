@@ -3,12 +3,14 @@ package person
 import (
 	"context"
 	"encoding/json"
-	"github.com/bearbin/go-age"
-	"github.com/vsantosalmeida/go-grpc-server/protobuf"
-	"go-app-engine-demo/pkg/crypto"
-	"go-app-engine-demo/pkg/entity"
-	"google.golang.org/grpc"
 	"log"
+
+	"github.com/bearbin/go-age"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/crypto"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/entity"
+	"github.com/vsantosalmeida/go-grpc-server/protobuf"
+
+	"google.golang.org/grpc"
 )
 
 //service service interface

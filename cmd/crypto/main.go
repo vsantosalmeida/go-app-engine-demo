@@ -1,16 +1,17 @@
 package main
 
 import (
-	"github.com/codegangsta/negroni"
-	"github.com/gorilla/mux"
-	"go-app-engine-demo/api/handler"
-	"go-app-engine-demo/config"
-	"go-app-engine-demo/pkg/midleware"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/codegangsta/negroni"
+	"github.com/gorilla/mux"
+	"github.com/vsantosalmeida/go-app-engine-demo/api/handler"
+	"github.com/vsantosalmeida/go-app-engine-demo/config"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/midleware"
 )
 
 func main() {

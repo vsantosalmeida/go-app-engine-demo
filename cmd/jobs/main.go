@@ -1,15 +1,18 @@
 package main
 
 import (
-	"cloud.google.com/go/datastore"
 	"context"
-	"github.com/vsantosalmeida/go-grpc-server/protobuf"
-	"go-app-engine-demo/config"
-	"go-app-engine-demo/pkg/jobs"
-	"go-app-engine-demo/pkg/person"
-	"google.golang.org/grpc"
 	"log"
 	"time"
+
+	"github.com/vsantosalmeida/go-app-engine-demo/config"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/jobs"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/person"
+	"github.com/vsantosalmeida/go-grpc-server/protobuf"
+
+	"cloud.google.com/go/datastore"
+
+	"google.golang.org/grpc"
 )
 
 func main() {

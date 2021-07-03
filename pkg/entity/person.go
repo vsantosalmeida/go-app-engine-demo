@@ -1,8 +1,9 @@
 package entity
 
 import (
-	"cloud.google.com/go/datastore"
 	"strings"
+
+	"cloud.google.com/go/datastore"
 )
 
 type Person struct {

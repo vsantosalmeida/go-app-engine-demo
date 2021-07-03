@@ -1,4 +1,4 @@
-module go-app-engine-demo
+module github.com/vsantosalmeida/go-app-engine-demo
 
 go 1.14
 

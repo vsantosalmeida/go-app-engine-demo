@@ -2,14 +2,15 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/codegangsta/negroni"
-	"github.com/gorilla/mux"
-	"go-app-engine-demo/api/dto"
-	"go-app-engine-demo/pkg/entity"
-	"go-app-engine-demo/pkg/person"
 	"log"
 	"net/http"
 	"sync"
+
+	"github.com/codegangsta/negroni"
+	"github.com/gorilla/mux"
+	"github.com/vsantosalmeida/go-app-engine-demo/api/dto"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/entity"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/person"
 )
 
 func personAdd(service person.UseCase) http.Handler {

@@ -1,10 +1,11 @@
 package person
 
 import (
-	"github.com/vsantosalmeida/go-grpc-server/protobuf"
-	"go-app-engine-demo/pkg/entity"
 	"log"
 	"time"
+
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/entity"
+	"github.com/vsantosalmeida/go-grpc-server/protobuf"
 )
 
 const dateLayout = "2006-01-02"

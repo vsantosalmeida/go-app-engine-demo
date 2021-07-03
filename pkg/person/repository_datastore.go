@@ -1,15 +1,18 @@
 package person
 
 import (
-	"cloud.google.com/go/datastore"
 	"context"
-	"github.com/google/uuid"
-	"go-app-engine-demo/config"
-	"go-app-engine-demo/pkg/entity"
-	"google.golang.org/api/iterator"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/vsantosalmeida/go-app-engine-demo/config"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/entity"
+
+	"cloud.google.com/go/datastore"
+
+	"google.golang.org/api/iterator"
 )
 
 const timeoutDuration = 3 * time.Second

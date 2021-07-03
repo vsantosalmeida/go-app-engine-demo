@@ -1,6 +1,6 @@
 package jobs
 
-import "go-app-engine-demo/pkg/entity"
+import "github.com/vsantosalmeida/go-app-engine-demo/pkg/entity"
 
 type JobService interface {
 	Start() error

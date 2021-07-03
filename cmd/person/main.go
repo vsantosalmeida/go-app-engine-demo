@@ -1,21 +1,24 @@
 package main
 
 import (
-	"cloud.google.com/go/datastore"
 	"context"
-	"github.com/codegangsta/negroni"
-	"github.com/gorilla/mux"
-	"github.com/vsantosalmeida/go-grpc-server/protobuf"
-	"go-app-engine-demo/api/handler"
-	"go-app-engine-demo/config"
-	"go-app-engine-demo/pkg/midleware"
-	"go-app-engine-demo/pkg/person"
-	"google.golang.org/grpc"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/codegangsta/negroni"
+	"github.com/gorilla/mux"
+	"github.com/vsantosalmeida/go-app-engine-demo/api/handler"
+	"github.com/vsantosalmeida/go-app-engine-demo/config"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/midleware"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/person"
+	"github.com/vsantosalmeida/go-grpc-server/protobuf"
+
+	"cloud.google.com/go/datastore"
+
+	"google.golang.org/grpc"
 )
 
 func main() {

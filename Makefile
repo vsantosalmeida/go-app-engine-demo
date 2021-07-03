@@ -11,12 +11,12 @@ clean:
 
 build-person-api:
 	@ echo " ---         BUILDING Person API     --- "
+	@ $(MAKE) clean
 	@ go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(PERSON_BINARY_NAME) cmd/person/main.go
 	@ echo " ---      FINISH BUILD       --- "
 
 build-person-api-docker:
-	@ $(MAKE) clean build-person-api
-	@ docker build --no-cache -t larolman/go-person-api ./build/api/person
+	@ docker build --no-cache --pull -f ./build/api/person/Dockerfile -t larolman/go-person-api .
 
 push-person-api-docker-image:
 	@ docker login
@@ -24,13 +24,29 @@ push-person-api-docker-image:
 
 build-job:
 	@ echo " ---         BUILDING JOB       --- "
+	@ $(MAKE) clean
 	@ go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(JOB_BINARY_NAME) cmd/jobs/main.go
 	@ echo " ---      FINISH BUILD       --- "
 
+build-job-docker:
+	@ docker build --no-cache --pull -f ./build/jobs/Dockerfile -t larolman/go-job .
+
+push-job-docker-image:
+	@ docker login
+	@ docker push $(DOCKER_REPO)/go-job:latest
+
 build-crypto-api:
 	@ echo " ---         BUILDING  Crypto API      --- "
+	@ $(MAKE) clean
 	@ go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(CRYPTO_BINARY_NAME) cmd/crypto/main.go
 	@ echo " ---      FINISH BUILD       --- "
+
+build-crypto-api-docker:
+	@ docker build --no-cache --pull -f ./build/api/crypto/Dockerfile -t larolman/go-crypto-api .
+
+push-crypto-api-docker-image:
+	@ docker login
+	@ docker push $(DOCKER_REPO)/go-crypto-api:latest
 
 set-project:
 	@ sed -i "s/project/${PROJECT}/g" app.yaml

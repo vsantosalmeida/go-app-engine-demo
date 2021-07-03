@@ -9,10 +9,10 @@ RUN apk add --no-cache \
    pkgconf \
    musl-dev
 RUN export GOPRIVATE=github.com/vsantosalmeida/*
-RUN make build-person-api
+RUN make build-crypto-api
 
 FROM alpine
 WORKDIR /root/
-COPY --from=builder /go/src/vsantosalmeida/go-app-engine-demo/bin/person-api.bin .
+COPY --from=builder /go/src/vsantosalmeida/go-app-engine-demo/bin/crypto-api.bin .
 EXPOSE 8080
 CMD ["./person-api"]
