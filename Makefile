@@ -14,6 +14,14 @@ build-person-api:
 	@ go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(PERSON_BINARY_NAME) cmd/person/main.go
 	@ echo " ---      FINISH BUILD       --- "
 
+build-person-api-docker:
+	@ $(MAKE) clean build-person-api
+	@ docker build --no-cache -t larolman/go-person-api ./build/api/person
+
+push-person-api-docker-image:
+	@ docker login
+	@ docker push $(DOCKER_REPO)/go-person-api:latest
+
 build-job:
 	@ echo " ---         BUILDING JOB       --- "
 	@ go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(JOB_BINARY_NAME) cmd/jobs/main.go
