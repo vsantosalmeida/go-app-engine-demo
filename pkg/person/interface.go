@@ -16,6 +16,7 @@ type reader interface {
 //used to save Person in a database
 type writer interface {
 	Store(p *entity.Person) error
+	Update(p *entity.Person, commitChan <-chan bool) error
 	Delete(k string) error
 }
 

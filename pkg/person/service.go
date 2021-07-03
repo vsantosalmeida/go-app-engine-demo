@@ -45,14 +45,13 @@ func (s *service) Store(p *entity.Person) error {
 	if err == nil {
 		go func() {
 			log.Printf("Creating person event")
-			err := s.createEvent(p)
+			err = s.createEvent(p)
 			if err != nil {
 				log.Printf("Failed to create event: %q", err)
 			}
 		}()
 	}
 	return err
-
 }
 
 // StoreMulti batch TODO método deve retornar algum erro em caso de falha
@@ -108,17 +107,32 @@ func (s *service) Delete(k string) error {
 
 func (s *service) createEvent(p *entity.Person) error {
 	log.Print("Event received")
+	commit := make(chan bool, 1)
 	m := mapPersonToProto(p)
+	p.Sent = true
+
+	go func() {
+		err := s.Update(p, commit)
+		if err != nil {
+			log.Printf("Failed to update entity: %q", err)
+		}
+	}()
 
 	var opts []grpc.CallOption
 	r, err := s.client.CreateEvent(context.Background(), m, opts...)
 	if err != nil {
 		log.Printf("Failed to send grpc event: %q", err)
+		commit <- false
 		return err
 	}
 
+	commit <- true
 	log.Printf("Success to send grpc event, reply: %v", r)
 	return nil
+}
+
+func (s *service) Update(p *entity.Person, commitChan <-chan bool) error {
+	return s.repo.Update(p, commitChan)
 }
 
 func (s *service) personStoreValidation(p *entity.Person) error {

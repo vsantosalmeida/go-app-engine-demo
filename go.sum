@@ -149,8 +149,10 @@ github.com/stretchr/testify v1.5.1 h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/vsantosalmeida/go-grpc-server v0.0.0-20210628020053-a066e730ce27 h1:rPgXij1U87hXI6drF6tZfqzbgMug75le8QMLB5Oxixk=
-github.com/vsantosalmeida/go-grpc-server v0.0.0-20210628020053-a066e730ce27/go.mod h1:FgM5bGhy+PJWHcftQBJT2H+SDQ+qeNvE1Zv/jL5kwRc=
+github.com/vsantosalmeida/go-grpc-server v0.0.0-20210628022905-9e65df92012f h1:PtOQPrarD45tPYAHQ2LZNTYBW7z4pNYGxcatdeXUocY=
+github.com/vsantosalmeida/go-grpc-server v0.0.0-20210628022905-9e65df92012f/go.mod h1:FgM5bGhy+PJWHcftQBJT2H+SDQ+qeNvE1Zv/jL5kwRc=
+github.com/vsantosalmeida/go-grpc-server v0.0.0-20210628024606-49d32a9a2797 h1:sSlFkt1AU8iTUZaUKRaXDQz1+xaH8kinMtpc482XBBM=
+github.com/vsantosalmeida/go-grpc-server v0.0.0-20210628024606-49d32a9a2797/go.mod h1:FgM5bGhy+PJWHcftQBJT2H+SDQ+qeNvE1Zv/jL5kwRc=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=

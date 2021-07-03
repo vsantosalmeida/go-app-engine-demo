@@ -22,7 +22,7 @@ func main() {
 	ctx := context.Background()
 	client, err := datastore.NewClient(ctx, config.GetProjectId())
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatalf("failed to create datastore client: %v", err)
 	}
 	defer client.Close()
 
@@ -37,6 +37,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to dial to grpc server: %v", err)
 	}
+	defer conn.Close()
 
 	rpcClient := protobuf.NewPersonReceiverClient(conn)
 
@@ -49,9 +50,6 @@ func main() {
 	)
 	//person
 	handler.MakePersonHandlers(router, *n, personSvc)
-
-	//crypto
-	handler.MakeCryptoHandlers(router, *n)
 
 	http.Handle("/", router)
 	router.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
@@ -71,6 +69,6 @@ func main() {
 	}
 	err = srv.ListenAndServe()
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatalf("failed to listen and serve: %v", err)
 	}
 }

@@ -11,6 +11,7 @@ type Person struct {
 	LastName  string  `json:"lastName,omitempty"`
 	BirthDate string  `json:"birthDate,omitempty"`
 	ParentKey string  `json:"parentKey,omitempty"`
+	Sent      bool    `json:"sent"`
 	Address   Address `json:"address,omitempty" datastore:",flatten"`
 }
 
