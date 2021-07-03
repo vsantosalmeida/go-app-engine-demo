@@ -45,10 +45,7 @@ func (s *service) Store(p *entity.Person) error {
 	if err == nil {
 		go func() {
 			log.Printf("Creating person event")
-			err = s.createEvent(p)
-			if err != nil {
-				log.Printf("Failed to create event: %q", err)
-			}
+			s.createEvent(p)
 		}()
 	}
 	return err
@@ -105,34 +102,29 @@ func (s *service) Delete(k string) error {
 	return s.repo.Delete(k)
 }
 
-func (s *service) createEvent(p *entity.Person) error {
+func (s *service) createEvent(p *entity.Person) {
 	log.Print("Event received")
 	commit := make(chan bool, 1)
-	m := mapPersonToProto(p)
+	done := make(chan bool, 1)
+	m := MapPersonToProto(p)
 	p.Sent = true
 
-	go func() {
-		err := s.Update(p, commit)
-		if err != nil {
-			log.Printf("Failed to update entity: %q", err)
-		}
-	}()
+	go s.repo.Update(p, commit, done)
 
 	var opts []grpc.CallOption
 	r, err := s.client.CreateEvent(context.Background(), m, opts...)
 	if err != nil {
 		log.Printf("Failed to send grpc event: %q", err)
 		commit <- false
-		return err
+		return
 	}
 
 	commit <- true
 	log.Printf("Success to send grpc event, reply: %v", r)
-	return nil
 }
 
-func (s *service) Update(p *entity.Person, commitChan <-chan bool) error {
-	return s.repo.Update(p, commitChan)
+func (s *service) Update(p *entity.Person, commitChan <-chan bool, doneChan chan<- bool) {
+	s.repo.Update(p, commitChan, doneChan)
 }
 
 func (s *service) personStoreValidation(p *entity.Person) error {

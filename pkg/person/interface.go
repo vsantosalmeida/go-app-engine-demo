@@ -12,18 +12,24 @@ type reader interface {
 	isKeyAssociated(pk string) (bool, error)
 }
 
+//jobReader Interface
+//used from jobs to get unsent persons
+type jobReader interface {
+	GetUnsent() ([]*entity.Person, error)
+}
+
 //writer person writer
 //used to save Person in a database
 type writer interface {
 	Store(p *entity.Person) error
-	Update(p *entity.Person, commitChan <-chan bool) error
+	Update(p *entity.Person, commitChan <-chan bool, doneChan chan<- bool)
 	Delete(k string) error
 }
 
 //event creation interface
-//used to send a message to a broker
+//used to send a message to grpc api
 type event interface {
-	createEvent(p *entity.Person) error
+	createEvent(p *entity.Person)
 }
 
 //batch used to store a batch of Person in database
@@ -43,6 +49,7 @@ type encrypt interface {
 type Repository interface {
 	reader
 	writer
+	jobReader
 }
 
 //UseCase use case interface

@@ -9,7 +9,7 @@ import (
 
 const dateLayout = "2006-01-02"
 
-func mapPersonToProto(p *entity.Person) *protobuf.Person {
+func MapPersonToProto(p *entity.Person) *protobuf.Person {
 	address := &protobuf.Address{
 		City:  p.Address.City,
 		State: p.Address.State,

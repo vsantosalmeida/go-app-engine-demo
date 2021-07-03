@@ -107,7 +107,7 @@ func (r *dataStoreRepository) Delete(k string) error {
 	return nil
 }
 
-func (r *dataStoreRepository) Update(p *entity.Person, commitChan <-chan bool) error {
+func (r *dataStoreRepository) Update(p *entity.Person, commitChan <-chan bool, doneChan chan<- bool) {
 	var tx *datastore.Transaction
 	pkey := datastore.NameKey(config.DatastoreKind, p.Key, nil)
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
@@ -116,13 +116,14 @@ func (r *dataStoreRepository) Update(p *entity.Person, commitChan <-chan bool) e
 	tx, err := r.client.NewTransaction(ctx)
 	if err != nil {
 		log.Printf("Failed to create a transaction: %q", err)
-		return err
+		doneChan <- true
+		return
 	}
 
 	_, err = tx.Put(pkey, p)
 	if err != nil {
 		log.Printf("Failed to save Person: %q", err)
-		return err
+		return
 	}
 
 	commit := <-commitChan
@@ -131,12 +132,29 @@ func (r *dataStoreRepository) Update(p *entity.Person, commitChan <-chan bool) e
 		_, err = tx.Commit()
 		if err != nil {
 			log.Printf("Failed to commit Transaction: %q", err)
-			return err
+			doneChan <- true
+			return
 		}
 		log.Printf("Entity saved: %s", p.Key)
 	} else {
 		log.Printf("Rollback transaction received")
 		_ = tx.Rollback()
 	}
-	return nil
+	doneChan <- true
+}
+
+func (r *dataStoreRepository) GetUnsent() ([]*entity.Person, error) {
+	query := datastore.NewQuery(config.DatastoreKind).Filter("Sent = ", false)
+	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
+	defer cancel()
+	var persons []*entity.Person
+
+	_, err := r.client.GetAll(ctx, query, &persons)
+	if err != nil {
+		log.Printf("Failed to find unsent persons: %q", err)
+		return nil, err
+	}
+
+	log.Printf("Found %d unsent persons", len(persons))
+	return persons, nil
 }
