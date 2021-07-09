@@ -36,9 +36,7 @@ func (j *job) Start() error {
 		return nil
 	}
 
-	j.send(p)
-
-	return nil
+	return j.send(p)
 }
 
 func (j *job) getUnsent() ([]*entity.Person, error) {
@@ -46,7 +44,7 @@ func (j *job) getUnsent() ([]*entity.Person, error) {
 	return j.repo.GetUnsent()
 }
 
-func (j *job) send(persons []*entity.Person) {
+func (j *job) send(persons []*entity.Person) error {
 	log.Print("Sending persons")
 
 	for _, p := range persons {
@@ -62,13 +60,14 @@ func (j *job) send(persons []*entity.Person) {
 		if err != nil || !r.Created {
 			log.Printf("Failed to send grpc event: %q", err)
 			commit <- false
-			return
+			return err
 		}
 
 		commit <- true
 		<-done
 		log.Printf("Success to send grpc event, reply: %v", r)
 	}
+	return nil
 }
 
 func (j *job) update(person *entity.Person, commitChan <-chan bool, doneChan chan<- bool) {
