@@ -71,7 +71,11 @@ func (s *service) StoreMulti(p []*entity.Person, success chan<- *entity.Person, 
 
 // FindByKey Find a person
 func (s *service) FindByKey(k string) (*entity.Person, error) {
-	return s.repo.FindByKey(k)
+	p, err := s.repo.FindByKey(k)
+	if err != nil {
+		return nil, handleError(err)
+	}
+	return p, nil
 }
 
 //FindAll persons
@@ -119,7 +123,7 @@ func (s *service) createEvent(p *entity.Person) {
 
 	var opts []grpc.CallOption
 	r, err := s.client.CreateEvent(context.Background(), m, opts...)
-	if err != nil {
+	if err != nil || !r.Created {
 		log.Printf("Failed to send grpc event: %q", err)
 		commit <- false
 		return
@@ -140,9 +144,12 @@ func (s *service) personStoreValidation(p *entity.Person) error {
 	}
 	if a < 18 {
 		log.Printf("Validating person with age less than 18")
+		if p.ParentKey == "" {
+			return NewErrValidatePerson("person with age less than 18 must have a valid parentKey")
+		}
 		_, err = s.FindByKey(p.ParentKey)
 		if err != nil {
-			return NewErrValidatePerson("person not found")
+			return err
 		}
 	}
 

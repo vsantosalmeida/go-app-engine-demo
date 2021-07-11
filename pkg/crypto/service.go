@@ -1,10 +1,10 @@
 package crypto
 
 type Service struct {
-	crypt dataCrypt
+	crypt DataCrypt
 }
 
-func NewService(crypt dataCrypt) UseCase {
+func NewService(crypt DataCrypt) UseCase {
 	return &Service{
 		crypt: crypt,
 	}

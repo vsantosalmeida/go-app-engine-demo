@@ -1,6 +1,6 @@
 package crypto
 
-type dataCrypt interface {
+type DataCrypt interface {
 	createHash() []byte
 	Encrypt() error
 	Decrypt() error
