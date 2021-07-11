@@ -3,6 +3,7 @@ package person
 import (
 	"context"
 	"encoding/json"
+	"github.com/vsantosalmeida/go-app-engine-demo/api/dto"
 	"log"
 
 	"github.com/bearbin/go-age"
@@ -53,12 +54,15 @@ func (s *service) Store(p *entity.Person) error {
 	return err
 }
 
-// StoreMulti batch TODO método deve retornar algum erro em caso de falha
-func (s *service) StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person) {
+func (s *service) StoreMulti(p []*entity.Person, success chan<- *entity.Person, failure chan<- *dto.FailurePerson) {
 	for _, person := range p {
 		err := s.Store(person)
 		if err != nil {
-			fail <- person
+			f := &dto.FailurePerson{
+				Person: person,
+				Reason: err.Error(),
+			}
+			failure <- f
 			continue
 		}
 		success <- person

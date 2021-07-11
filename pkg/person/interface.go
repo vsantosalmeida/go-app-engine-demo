@@ -1,6 +1,7 @@
 package person
 
 import (
+	"github.com/vsantosalmeida/go-app-engine-demo/api/dto"
 	"github.com/vsantosalmeida/go-app-engine-demo/pkg/entity"
 )
 
@@ -34,8 +35,7 @@ type event interface {
 
 //batch used to store a batch of Person in database
 type batch interface {
-	// StoreMulti TODO método deve retornar algum erro em caso de falha
-	StoreMulti(p []*entity.Person, success, fail chan<- *entity.Person)
+	StoreMulti(p []*entity.Person, success chan<- *entity.Person, failure chan<- *dto.FailurePerson)
 }
 
 //encrypt interface use to log personal data of a Person with security

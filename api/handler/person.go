@@ -53,7 +53,7 @@ func personMultiAdd(service person.UseCase) http.Handler {
 		var wg sync.WaitGroup
 		s := make(chan *entity.Person)
 		defer close(s)
-		f := make(chan *entity.Person)
+		f := make(chan *dto.FailurePerson)
 		defer close(f)
 		d := make(chan bool, 1)
 		defer close(d)
