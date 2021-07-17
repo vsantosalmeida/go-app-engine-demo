@@ -25,8 +25,10 @@ func main() {
 
 	personRepo := person.NewDataStoreRepository(client)
 
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
+	opts := []grpc.DialOption{
+		grpc.WithInsecure(),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"round_robin"}`),
+	}
 
 	conn, err := grpc.Dial(config.GetGrpcServerHost(), opts...)
 	if err != nil {
