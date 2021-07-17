@@ -3,10 +3,10 @@ package person
 import (
 	"context"
 	"encoding/json"
-	"github.com/vsantosalmeida/go-app-engine-demo/api/dto"
 	"log"
 
 	"github.com/bearbin/go-age"
+	"github.com/vsantosalmeida/go-app-engine-demo/api/dto"
 	"github.com/vsantosalmeida/go-app-engine-demo/pkg/crypto"
 	"github.com/vsantosalmeida/go-app-engine-demo/pkg/entity"
 	"github.com/vsantosalmeida/go-grpc-server/protobuf"
@@ -39,7 +39,7 @@ func (s *service) Store(p *entity.Person) error {
 		return err
 	}
 
-	c, err := s.encrypt(p)
+	c, err := s.Encrypt(p)
 	if err == nil {
 		log.Printf("Saving person: %s to database", c)
 	}
@@ -47,8 +47,8 @@ func (s *service) Store(p *entity.Person) error {
 	err = s.repo.Store(p)
 	if err == nil {
 		go func() {
-			log.Printf("Creating person event")
-			s.createEvent(p)
+			log.Printf("Creating person Event")
+			s.CreateEvent(p)
 		}()
 	}
 	return err
@@ -83,8 +83,8 @@ func (s *service) FindAll() ([]*entity.Person, error) {
 	return s.repo.FindAll()
 }
 
-func (s *service) isKeyAssociated(pk string) (bool, error) {
-	return s.repo.isKeyAssociated(pk)
+func (s *service) IsKeyAssociated(pk string) (bool, error) {
+	return s.repo.IsKeyAssociated(pk)
 }
 
 //Delete a person
@@ -102,7 +102,7 @@ func (s *service) Delete(k string) error {
 	}
 	if a > 18 {
 		// ok means the Person has a < 18 active Person
-		ok, err := s.isKeyAssociated(p.Key)
+		ok, err := s.IsKeyAssociated(p.Key)
 		if ok || err != nil {
 			log.Printf("Err to delete person, reason: person has a the key:%s associate to another person", k)
 			return NewErrDeletePerson("person has the key associate to another person")
@@ -112,7 +112,7 @@ func (s *service) Delete(k string) error {
 	return s.repo.Delete(k)
 }
 
-func (s *service) createEvent(p *entity.Person) {
+func (s *service) CreateEvent(p *entity.Person) {
 	log.Print("Event received")
 	commit := make(chan bool, 1)
 	done := make(chan bool, 1)
@@ -124,13 +124,13 @@ func (s *service) createEvent(p *entity.Person) {
 	var opts []grpc.CallOption
 	r, err := s.client.CreateEvent(context.Background(), m, opts...)
 	if err != nil || !r.Created {
-		log.Printf("Failed to send grpc event: %q", err)
+		log.Printf("Failed to send grpc Event: %q", err)
 		commit <- false
 		return
 	}
 
 	commit <- true
-	log.Printf("Success to send grpc event, reply: %v", r)
+	log.Printf("Success to send grpc Event, reply: %v", r)
 }
 
 func (s *service) Update(p *entity.Person, commitChan <-chan bool, doneChan chan<- bool) {
@@ -165,7 +165,7 @@ func (s *service) getPersonAge(bd string) (int, error) {
 	return age.Age(t), nil
 }
 
-func (s *service) encrypt(p *entity.Person) (string, error) {
+func (s *service) Encrypt(p *entity.Person) (string, error) {
 	log.Print("Encrypting person")
 	data, err := json.Marshal(p)
 	if err != nil {
@@ -177,7 +177,7 @@ func (s *service) encrypt(p *entity.Person) (string, error) {
 
 	err = c.Encrypt()
 	if err != nil {
-		log.Print("Failed to encrypt person")
+		log.Print("Failed to Encrypt person")
 		return "", err
 	}
 	return c.GetEncryptRaw(), nil

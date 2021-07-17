@@ -43,7 +43,7 @@ func (r *dataStoreRepository) FindByKey(k string) (*entity.Person, error) {
 	return &p, nil
 }
 
-func (r *dataStoreRepository) isKeyAssociated(pk string) (bool, error) {
+func (r *dataStoreRepository) IsKeyAssociated(pk string) (bool, error) {
 	query := datastore.NewQuery(config.DatastoreKind).Filter("ParentKey = ", pk)
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
 	defer cancel()

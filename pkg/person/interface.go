@@ -5,60 +5,60 @@ import (
 	"github.com/vsantosalmeida/go-app-engine-demo/pkg/entity"
 )
 
-//reader Interface
+//Reader Interface
 //used to query Person in a database
-type reader interface {
+type Reader interface {
 	FindAll() ([]*entity.Person, error)
 	FindByKey(k string) (*entity.Person, error)
-	isKeyAssociated(pk string) (bool, error)
+	IsKeyAssociated(pk string) (bool, error)
 }
 
-//jobReader Interface
+//JobReader Interface
 //used from jobs to get unsent persons
-type jobReader interface {
+type JobReader interface {
 	GetUnsent() ([]*entity.Person, error)
 }
 
-//writer person writer
+//Writer person Writer
 //used to save Person in a database
-type writer interface {
+type Writer interface {
 	Store(p *entity.Person) error
 	Update(p *entity.Person, commitChan <-chan bool, doneChan chan<- bool)
 	Delete(k string) error
 }
 
-//event creation interface
+//Event creation interface
 //used to send a message to grpc api
-type event interface {
-	createEvent(p *entity.Person)
+type Event interface {
+	CreateEvent(p *entity.Person)
 }
 
-//batch used to store a batch of Person in database
-type batch interface {
+//Batch used to store a Batch of Person in database
+type Batch interface {
 	StoreMulti(p []*entity.Person, success chan<- *entity.Person, failure chan<- *dto.FailurePerson)
 }
 
-//encrypt interface use to log personal data of a Person with security
+//Encrypt interface use to log personal data of a Person with security
 //must be used in crypto endpoint if want to see the content
-type encrypt interface {
-	encrypt(p *entity.Person) (string, error)
+type Encrypt interface {
+	Encrypt(p *entity.Person) (string, error)
 }
 
 //Repository Repository interface
 //any database system must implement these interfaces
 type Repository interface {
-	reader
-	writer
-	jobReader
+	Reader
+	Writer
+	JobReader
 }
 
 //UseCase use case interface
 //implementation of all requirements to service layer
 //control the business rules
 type UseCase interface {
-	reader
-	writer
-	event
-	batch
-	encrypt
+	Reader
+	Writer
+	Event
+	Batch
+	Encrypt
 }

@@ -15,21 +15,21 @@ func decrypt() http.Handler {
 		var crypt *crypto.Crypto
 		err := json.NewDecoder(r.Body).Decode(&crypt)
 		if err != nil {
-			log.Println(err.Error())
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		svc := crypto.NewService(crypt)
 		err = svc.Decrypt()
 		if err != nil {
-			log.Println(err.Error())
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
 		if err = json.NewEncoder(w).Encode(string(svc.GetDecryptRaw())); err != nil {
-			log.Println(err.Error())
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}

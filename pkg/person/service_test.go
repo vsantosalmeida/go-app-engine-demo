@@ -1,12 +1,14 @@
 package person
 
 import (
+	"github.com/vsantosalmeida/go-app-engine-demo/api/dto"
 	"sync"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/vsantosalmeida/go-app-engine-demo/pkg/entity"
+	"github.com/vsantosalmeida/go-app-engine-demo/pkg/person/mocks"
 )
 
 const hk = "xpto"
@@ -72,8 +74,9 @@ func TestService_Store(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := NewMemRepo()
-			svc := NewService(repo, hk)
+			repo := &mocks.Repository{}
+			client := &mocks.PersonReceiverClient{}
+			svc := NewService(repo, client, hk)
 			err := svc.Store(tt.p1)
 			if tt.p2 != nil {
 				err = svc.Store(tt.p2)
@@ -95,8 +98,9 @@ func TestService_FindByKey(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := NewMemRepo()
-			svc := NewService(repo, hk)
+			repo := &mocks.Repository{}
+			client := &mocks.PersonReceiverClient{}
+			svc := NewService(repo, client, hk)
 			_ = svc.Store(firstPerson)
 			p, err := svc.FindByKey(tt.key)
 			assert.IsType(t, tt.expectedErr, err)
@@ -125,8 +129,9 @@ func TestService_Delete(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := NewMemRepo()
-			svc := NewService(repo, hk)
+			repo := &mocks.Repository{}
+			client := &mocks.PersonReceiverClient{}
+			svc := NewService(repo, client, hk)
 			_ = svc.Store(tt.p1)
 			if tt.p2 != nil {
 				_ = svc.Store(tt.p2)
@@ -150,18 +155,19 @@ func TestService_StoreMulti(t *testing.T) {
 		fail    int
 		b       []*entity.Person
 	}{
-		{name: "When receive a batch with correct persons must store it", success: 3, fail: 0, b: []*entity.Person{firstPerson, secondPerson, thirdPerson}},
-		{name: "When receive a batch with some incorrect persons must have error", success: 2, fail: 2, b: []*entity.Person{thirdPerson, secondPerson, firstPerson, fourthPerson}},
+		{name: "When receive a Batch with correct persons must store it", success: 3, fail: 0, b: []*entity.Person{firstPerson, secondPerson, thirdPerson}},
+		{name: "When receive a Batch with some incorrect persons must have error", success: 2, fail: 2, b: []*entity.Person{thirdPerson, secondPerson, firstPerson, fourthPerson}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var wg sync.WaitGroup
 			wg.Add(len(tt.b))
-			repo := NewMemRepo()
-			svc := NewService(repo, hk)
+			repo := &mocks.Repository{}
+			client := &mocks.PersonReceiverClient{}
+			svc := NewService(repo, client, hk)
 			s := make(chan *entity.Person)
-			f := make(chan *entity.Person)
+			f := make(chan *dto.FailurePerson)
 			d := make(chan bool)
 			var totalSuccess int
 			var totalFail int
@@ -203,13 +209,14 @@ func TestServiceIsKeyAssociated(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := NewMemRepo()
-			svc := NewService(repo, hk)
+			repo := &mocks.Repository{}
+			client := &mocks.PersonReceiverClient{}
+			svc := NewService(repo, client, hk)
 			_ = svc.Store(firstPerson)
 			_ = svc.Store(secondPerson)
 			_ = svc.Store(thirdPerson)
 
-			got, _ := svc.isKeyAssociated(tt.key)
+			got, _ := svc.IsKeyAssociated(tt.key)
 
 			assert.Equal(t, got, tt.expect)
 		})
